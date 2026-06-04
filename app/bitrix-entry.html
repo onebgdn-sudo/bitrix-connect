@@ -89,9 +89,54 @@
     const target = new URL('./index.html', location.href);
     target.search = location.search;
     target.hash = location.hash;
-    setTimeout(() => {
+
+    const redirectToApp = () => setTimeout(() => {
       location.replace(target.toString());
     }, 60);
+
+    const install = () => {
+      if (!window.BX24 || typeof window.BX24.init !== 'function') {
+        redirectToApp();
+        return;
+      }
+
+      window.BX24.init(() => {
+        const finish = typeof window.BX24.installFinish === 'function'
+          ? window.BX24.installFinish.bind(window.BX24)
+          : null;
+
+        const bindPlacement = () => {
+          if (!placement || typeof window.BX24.callMethod !== 'function') {
+            redirectToApp();
+            return;
+          }
+
+          window.BX24.callMethod(
+            'placement.bind',
+            {
+              PLACEMENT: placement,
+              HANDLER: target.toString(),
+            },
+            () => redirectToApp()
+          );
+        };
+
+        if (finish) {
+          try {
+            finish();
+          } catch (_) {}
+        }
+
+        bindPlacement();
+      });
+    };
+
+    const sdk = document.createElement('script');
+    sdk.src = 'https://api.bitrix24.com/api/v1/';
+    sdk.async = true;
+    sdk.onload = install;
+    sdk.onerror = redirectToApp;
+    document.head.appendChild(sdk);
   </script>
 </body>
 </html>
