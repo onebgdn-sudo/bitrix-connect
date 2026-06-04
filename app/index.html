@@ -1798,6 +1798,34 @@
       memberId,
       mobile: isMobileMode
     };
+    const appConfig = {
+      apiBaseUrl: '',
+      publicBaseUrl: '',
+      deploymentMode: 'local'
+    };
+
+    function normalizeBaseUrl(value) {
+      return String(value || '').trim().replace(/\/+$/, '');
+    }
+
+    function apiUrl(path) {
+      const cleanPath = String(path || '').startsWith('/') ? String(path || '') : `/${String(path || '')}`;
+      if (appConfig.apiBaseUrl) return `${appConfig.apiBaseUrl}${cleanPath}`;
+      return cleanPath;
+    }
+
+    async function loadRuntimeConfig() {
+      try {
+        const response = await fetch('/runtime-config.json', { cache: 'no-store' });
+        if (!response.ok) return;
+        const config = await response.json();
+        appConfig.apiBaseUrl = normalizeBaseUrl(config.apiBaseUrl || '');
+        appConfig.publicBaseUrl = normalizeBaseUrl(config.publicBaseUrl || '');
+        appConfig.deploymentMode = config.deploymentMode || appConfig.deploymentMode;
+      } catch (_) {}
+    }
+
+    const runtimeConfigReady = loadRuntimeConfig();
 
     if (placement) {
       const banner = document.createElement('div');
@@ -2826,7 +2854,8 @@
       };
       append('system', `Пробую добавить ${person.name} в Bitrix CRM.`);
       try {
-        const response = await fetch('/api/bitrix/add-contact', {
+        await runtimeConfigReady;
+        const response = await fetch(apiUrl('/api/bitrix/add-contact'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ candidate })
@@ -3004,7 +3033,8 @@
         return;
       }
 
-      const response = await fetch('/api/chat', {
+      await runtimeConfigReady;
+      const response = await fetch(apiUrl('/api/chat'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, placement, placementOptions })

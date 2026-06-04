@@ -1,0 +1,13 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    CARTE_PORT=8787
+
+COPY . /app
+
+EXPOSE 8787
+
+CMD ["python", "app/backend.py"]

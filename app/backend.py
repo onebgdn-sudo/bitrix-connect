@@ -35,6 +35,23 @@ def load_env(path=ROOT_DIR / ".env"):
 
 load_env()
 
+PUBLIC_BASE_URL = os.getenv("CARTE_PUBLIC_BASE_URL", "").strip().rstrip("/")
+API_BASE_URL = os.getenv("CARTE_API_BASE_URL", "").strip().rstrip("/")
+
+
+def runtime_config_payload():
+    public_base_url = PUBLIC_BASE_URL or ""
+    api_base_url = API_BASE_URL or ""
+    return {
+        "publicBaseUrl": public_base_url,
+        "apiBaseUrl": api_base_url,
+        "indexPath": "/index.html",
+        "entryPath": "/bitrix-entry.html",
+        "mobilePath": "/mobile.html",
+        "deploymentMode": "stable" if public_base_url else "local",
+        "timestamp": int(time.time()),
+    }
+
 
 DEMO_CONTACTS = [
     {
@@ -778,6 +795,24 @@ def _fetch_public_page(url):
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(APP_DIR), **kwargs)
+
+    def do_GET(self):
+        clean_path = urllib.parse.urlparse(self.path).path
+        if clean_path in {"/runtime-config.json", "/api/runtime-config"}:
+            write_json(self, runtime_config_payload())
+            return
+        if clean_path in {"/healthz", "/api/healthz"}:
+            write_json(
+                self,
+                {
+                    "ok": True,
+                    "service": "Carte Showbiz",
+                    "mode": runtime_config_payload()["deploymentMode"],
+                    "publicBaseUrl": runtime_config_payload()["publicBaseUrl"],
+                },
+            )
+            return
+        super().do_GET()
 
     def do_POST(self):
         try:
