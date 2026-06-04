@@ -14,6 +14,7 @@ APP_DIR = Path(__file__).resolve().parent
 ROOT_DIR = APP_DIR.parent
 LOG_DIR = ROOT_DIR / "runtime"
 RESEARCH_LOG = LOG_DIR / "research_tasks.jsonl"
+BITRIX_INSTALL_LOG = LOG_DIR / "bitrix_app_install.jsonl"
 WEBHOOK_FILE_CANDIDATES = [
     ROOT_DIR / "outputs" / "bitrix24-webhook.txt",
     Path.home() / "Documents" / "Codex" / "outputs" / "bitrix24-webhook.txt",
@@ -153,10 +154,28 @@ SOURCE_LIBRARY = [
 ]
 
 
-def read_json_body(handler):
+def read_raw_body(handler):
     length = int(handler.headers.get("Content-Length") or 0)
-    raw = handler.rfile.read(length).decode("utf-8") if length else "{}"
+    return handler.rfile.read(length).decode("utf-8", errors="replace") if length else ""
+
+
+def read_json_body(handler):
+    raw = read_raw_body(handler) or "{}"
     return json.loads(raw or "{}")
+
+
+def read_bitrix_body(handler):
+    raw = read_raw_body(handler)
+    if not raw:
+        return {}
+    content_type = (handler.headers.get("Content-Type") or "").lower()
+    if "application/json" in content_type:
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return {"_raw": raw}
+    parsed = urllib.parse.parse_qs(raw, keep_blank_values=True)
+    return {key: values[-1] if values else "" for key, values in parsed.items()}
 
 
 def write_json(handler, payload, status=200):
@@ -173,6 +192,21 @@ def log_research(entry):
     payload = {"createdAt": time.strftime("%Y-%m-%dT%H:%M:%S%z"), **entry}
     with RESEARCH_LOG.open("a", encoding="utf-8") as log_file:
         log_file.write(json.dumps(payload, ensure_ascii=False) + "\n")
+
+
+def log_bitrix_install(payload):
+    LOG_DIR.mkdir(exist_ok=True)
+    safe_payload = dict(payload)
+    for key in list(safe_payload):
+        if any(part in key.lower() for part in ["auth", "token", "secret", "refresh"]):
+            safe_payload[key] = "[stored locally]"
+    with BITRIX_INSTALL_LOG.open("a", encoding="utf-8") as log_file:
+        log_file.write(json.dumps({"createdAt": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "payload": safe_payload}, ensure_ascii=False) + "\n")
+
+
+def is_bitrix_entry_path(path):
+    clean_path = urllib.parse.urlparse(path).path
+    return clean_path in {"/", "/index.html", "/bitrix-entry.html", "/mobile.html"}
 
 
 def classify_request(prompt):
@@ -747,7 +781,9 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         try:
-            if self.path == "/api/chat":
+            clean_path = urllib.parse.urlparse(self.path).path
+
+            if clean_path == "/api/chat":
                 body = read_json_body(self)
                 prompt = (body.get("message") or "").strip()
                 candidates = select_candidates(prompt)
@@ -772,14 +808,14 @@ class Handler(SimpleHTTPRequestHandler):
                 write_json(self, {"answer": answer, "candidates": candidates, "research": research, "attention": attention})
                 return
 
-            if self.path == "/api/bitrix/add-contact":
+            if clean_path == "/api/bitrix/add-contact":
                 body = read_json_body(self)
                 candidate = body.get("candidate") or {}
                 result = bitrix_call("crm.contact.add", {"fields": bitrix_contact_fields(candidate)})
                 write_json(self, {"ok": True, "result": result})
                 return
 
-            if self.path == "/api/bitrix/status":
+            if clean_path == "/api/bitrix/status":
                 result = bitrix_call("user.current", {})
                 write_json(
                     self,
@@ -794,7 +830,7 @@ class Handler(SimpleHTTPRequestHandler):
                 )
                 return
 
-            if self.path == "/api/follow-up":
+            if clean_path == "/api/follow-up":
                 body = read_json_body(self)
                 title = body.get("title") or "Follow-up по музыкальному контакту"
                 description = body.get("description") or ""
@@ -802,7 +838,7 @@ class Handler(SimpleHTTPRequestHandler):
                 write_json(self, {"ok": True, "result": result})
                 return
 
-            if self.path == "/api/research/parse":
+            if clean_path == "/api/research/parse":
                 body = read_json_body(self)
                 urls = [str(url).strip() for url in (body.get("urls") or []) if str(url).strip()]
                 focus = (body.get("focus") or "").strip()
@@ -833,6 +869,13 @@ class Handler(SimpleHTTPRequestHandler):
                         "summary": "Парсер собрал публичные страницы и вытащил сигналы, которые можно нормализовать в CRM.",
                     },
                 )
+                return
+
+            if is_bitrix_entry_path(self.path):
+                payload = read_bitrix_body(self)
+                if payload:
+                    log_bitrix_install(payload)
+                self.do_GET()
                 return
 
             write_json(self, {"error": "Unknown endpoint"}, status=404)

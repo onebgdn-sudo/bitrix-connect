@@ -115,4 +115,6 @@ Backend анализирует запрос на естественном язы
 - `member_id` - идентификатор портала/сессии
 - `mobile=1` - мобильный режим
 
-Для Bitrix удобнее использовать `app/bitrix-entry.html` как handler URL, а он уже перенаправит в основной экран с сохранением контекста.
+Для Bitrix удобнее использовать `bitrix-entry.html` как handler URL, а он уже перенаправит в основной экран с сохранением контекста.
+
+Пошаговая инструкция для подключения приложения в Bitrix лежит в [`BITRIX_APP_SETUP.md`](/Users/bogdan/Documents/bitrix%20connect/BITRIX_APP_SETUP.md).

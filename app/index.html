@@ -40,6 +40,12 @@
       background: linear-gradient(180deg, #f4f7fb 0%, #eef3f8 100%);
     }
 
+    body.bitrix-mode {
+      background:
+        radial-gradient(circle at top left, rgba(15, 102, 255, 0.08), transparent 24%),
+        linear-gradient(180deg, #f5f8fc 0%, #edf3f8 100%);
+    }
+
     .shell {
       max-width: 1360px;
       margin: 0 auto;
@@ -47,6 +53,10 @@
       display: grid;
       grid-template-rows: auto auto minmax(0, 1fr);
       gap: 14px;
+    }
+
+    body.bitrix-mode .shell {
+      max-width: 1480px;
     }
 
     body.mobile-mode .shell {
@@ -82,6 +92,14 @@
       background: linear-gradient(180deg, #0f66ff, #2ec4b6);
     }
 
+    body.bitrix-mode .header {
+      padding: 14px 16px;
+    }
+
+    body.bitrix-mode .tabs {
+      padding: 8px;
+    }
+
     .placement-banner {
       margin-top: -4px;
       padding: 10px 18px;
@@ -103,6 +121,11 @@
       color: var(--ink);
       font-size: 13px;
       margin-bottom: 2px;
+    }
+
+    body.bitrix-mode .placement-banner {
+      background: rgba(255,255,255,0.95);
+      border-color: rgba(15, 102, 255, 0.12);
     }
 
     h1, h2, h3, p { margin: 0; }
@@ -1385,11 +1408,18 @@
       placementOptions = {};
     }
     document.body.classList.toggle('mobile-mode', isMobileMode);
+    document.body.classList.toggle('bitrix-mode', Boolean(placement));
     const placementLabel = placement
-      ? (placement.startsWith('CRM_') ? 'CRM detail' : placement)
+      ? (placement === 'LEFT_MENU'
+        ? 'Bitrix left menu'
+        : placement.startsWith('CRM_')
+          ? 'CRM detail'
+          : placement)
       : (isMobileMode ? 'mobile test' : 'мессенджер');
     document.getElementById('mode-label').textContent = placementLabel;
-    document.title = isMobileMode ? 'Carte Showbiz Mobile' : 'Carte Showbiz';
+    document.title = placement
+      ? `Carte Showbiz · ${placementLabel}`
+      : (isMobileMode ? 'Carte Showbiz Mobile' : 'Carte Showbiz');
 
     const messages = document.getElementById('messages');
     const prompt = document.getElementById('prompt');
