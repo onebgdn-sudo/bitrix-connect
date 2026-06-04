@@ -4,18 +4,18 @@ This project is ready to be connected as a Bitrix24 app.
 
 Current public test URL:
 
-- `https://bitrixconnectbogdan3.loca.lt`
+- `https://ed49cb6ae3530f.lhr.life`
 
 Recommended Bitrix handler URLs:
 
-- Left menu: `https://bitrixconnectbogdan3.loca.lt/bitrix-entry.html?placement=LEFT_MENU`
-- CRM contact tab: `https://bitrixconnectbogdan3.loca.lt/bitrix-entry.html?placement=CRM_CONTACT_DETAIL_TAB`
-- CRM contact toolbar: `https://bitrixconnectbogdan3.loca.lt/bitrix-entry.html?placement=CRM_CONTACT_DETAIL_TOOLBAR`
+- Left menu: `https://ed49cb6ae3530f.lhr.life/bitrix-entry.html?placement=LEFT_MENU`
+- CRM contact tab: `https://ed49cb6ae3530f.lhr.life/bitrix-entry.html?placement=CRM_CONTACT_DETAIL_TAB`
+- CRM contact toolbar: `https://ed49cb6ae3530f.lhr.life/bitrix-entry.html?placement=CRM_CONTACT_DETAIL_TOOLBAR`
 
 What to register in Bitrix:
 
 - App type: iframe / embedded app
-- Main entry: `https://bitrixconnectbogdan3.loca.lt/bitrix-entry.html`
+- Main entry: `https://ed49cb6ae3530f.lhr.life/bitrix-entry.html`
 - Left menu placement: `LEFT_MENU`
 - Optional CRM placements:
   - `CRM_CONTACT_DETAIL_TAB`
