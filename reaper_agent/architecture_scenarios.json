@@ -1,0 +1,74 @@
+[
+  {
+    "name": "simple_track",
+    "user_request": "Создай новую дорожку для вокала и назови её Lead Vocal.",
+    "expected_domains": ["tracks"],
+    "required_tools": ["create_track", "rename_track", "verify_project_state"]
+  },
+  {
+    "name": "track_plus_fx",
+    "user_request": "Создай трек для баса, добавь туда Serum.",
+    "expected_domains": ["tracks", "fx"],
+    "required_tools": ["create_track", "resolve_fx", "insert_fx", "verify_project_state"]
+  },
+  {
+    "name": "context_last_created",
+    "user_request": "Добавь на неё Serum.",
+    "expected_domains": ["tracks", "fx"],
+    "required_tools": ["get_last_created_track", "resolve_track", "resolve_fx", "insert_fx", "verify_project_state"]
+  },
+  {
+    "name": "selected_track_fx",
+    "user_request": "На выбранный трек добавь компрессор.",
+    "expected_domains": ["tracks", "fx"],
+    "required_tools": ["get_selected_tracks", "resolve_fx", "insert_fx", "verify_project_state"]
+  },
+  {
+    "name": "midi_generation",
+    "user_request": "Создай MIDI item на 8 тактов и напиши басовую партию в стиле Brazilian phonk.",
+    "expected_domains": ["tracks", "midi"],
+    "required_tools": ["get_project_state", "get_selected_tracks", "create_track", "create_midi_item", "generate_bassline", "write_midi_notes", "verify_project_state"]
+  },
+  {
+    "name": "multi_step_chain",
+    "user_request": "Создай басовую дорожку, добавь Serum, сделай MIDI на 8 тактов, потом создай дорожку Kick и сделай сайдчейн от кика к басу.",
+    "expected_domains": ["tracks", "fx", "midi", "routing"],
+    "required_tools": ["create_track", "resolve_fx", "insert_fx", "create_midi_item", "generate_bassline", "write_midi_notes", "create_sidechain_send", "verify_project_state"]
+  },
+  {
+    "name": "missing_plugin",
+    "user_request": "Добавь на бас плагин SuperMegaSynth.",
+    "expected_domains": ["fx"],
+    "required_tools": ["resolve_fx", "insert_fx", "verify_project_state"]
+  },
+  {
+    "name": "recipe_macro",
+    "user_request": "Собери заготовку Brazilian phonk проекта: барабаны, cowbell, бас, сайдчейн и регионы intro/drop.",
+    "expected_domains": ["recipes", "tracks", "fx", "midi", "routing", "arrangement"],
+    "required_tools": ["create_brazilian_phonk_project", "verify_project_state"]
+  },
+  {
+    "name": "render_export",
+    "user_request": "Отрендери стемы всех дорожек в папку проекта.",
+    "expected_domains": ["render", "tracks", "project"],
+    "required_tools": ["get_track_list", "export_stems", "verify_project_state"]
+  },
+  {
+    "name": "ambiguous_command",
+    "user_request": "Сделай его громче.",
+    "expected_domains": ["analysis", "tracks"],
+    "required_tools": ["get_project_state", "get_selected_tracks", "get_last_created_track", "verify_project_state"]
+  },
+  {
+    "name": "sidechain_phrase",
+    "user_request": "Сделай чтобы бас качался от бочки, но не прям жёстко.",
+    "expected_domains": ["tracks", "fx", "routing"],
+    "required_tools": ["resolve_track", "create_sidechain_send", "verify_project_state"]
+  },
+  {
+    "name": "sequential_dialog",
+    "user_request": "Создай трек под пианино. Добавь туда Kontakt. Сделай аккорды на 4 такта в миноре. Скопируй это ещё 3 раза.",
+    "expected_domains": ["tracks", "fx", "midi"],
+    "required_tools": ["create_track", "resolve_fx", "insert_fx", "create_midi_item", "generate_chord_progression", "write_midi_notes", "verify_project_state"]
+  }
+]

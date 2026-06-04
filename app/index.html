@@ -1,0 +1,2861 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carte Showbiz</title>
+  <style>
+    :root {
+      --bg: #edf2f7;
+      --panel: #ffffff;
+      --ink: #1b2430;
+      --muted: #6a7684;
+      --line: #d6dee7;
+      --brand: #0f66ff;
+      --brand-soft: rgba(15, 102, 255, 0.08);
+      --shadow: 0 16px 40px rgba(15, 35, 60, 0.08);
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(15, 102, 255, 0.10), transparent 24%),
+        radial-gradient(circle at top right, rgba(46, 196, 182, 0.08), transparent 22%),
+        linear-gradient(180deg, #f3f7fb 0%, #edf3f8 100%);
+      color: var(--ink);
+      font-family: "Aptos", "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    body.mobile-mode {
+      padding: 0;
+      background: linear-gradient(180deg, #f4f7fb 0%, #eef3f8 100%);
+    }
+
+    .shell {
+      max-width: 1360px;
+      margin: 0 auto;
+      min-height: calc(100vh - 32px);
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    body.mobile-mode .shell {
+      max-width: none;
+      min-height: 100vh;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .header, .tabs, .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .header {
+      padding: 16px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: linear-gradient(180deg, #0f66ff, #2ec4b6);
+    }
+
+    .placement-banner {
+      margin-top: -4px;
+      padding: 10px 18px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.92);
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .placement-banner strong {
+      display: block;
+      color: var(--ink);
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      font-size: 18px;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 32px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 102, 255, 0.18);
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-size: 13px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #1a8a4c;
+      box-shadow: 0 0 0 3px rgba(26, 138, 76, 0.12);
+    }
+
+    .tabs {
+      padding: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    body.mobile-mode .tabs {
+      padding: 8px;
+      position: sticky;
+      top: 0;
+      z-index: 8;
+      backdrop-filter: blur(12px);
+    }
+
+    .tab {
+      min-height: 38px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #314155;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: var(--brand-soft);
+      border-color: rgba(15, 102, 255, 0.18);
+      color: var(--brand);
+    }
+
+    .panel {
+      min-height: 0;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.98)),
+        var(--panel);
+    }
+
+    .view {
+      min-height: 0;
+      height: 100%;
+      display: none;
+    }
+
+    .view.active { display: grid; }
+
+    .chat-view {
+      grid-template-rows: auto minmax(0, 1fr) auto;
+    }
+
+    .contacts-view {
+      grid-template-rows: auto auto minmax(0, 1fr);
+    }
+
+    .chat-top, .contacts-top {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(180deg, rgba(15, 102, 255, 0.03), transparent);
+    }
+
+    .chat-top .title, .contacts-top .title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .messages {
+      padding: 18px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      min-height: 0;
+      overflow: auto;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.70), rgba(255,255,255,0.86)),
+        radial-gradient(circle at center top, rgba(15,102,255,0.03), transparent 45%);
+    }
+
+    .msg {
+      max-width: min(760px, 92%);
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid transparent;
+      line-height: 1.5;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .msg.user {
+      margin-left: auto;
+      background: linear-gradient(180deg, #1a72ff, #0f66ff);
+      color: #fff;
+      border-top-right-radius: 6px;
+      box-shadow: 0 12px 24px rgba(15, 102, 255, 0.16);
+    }
+
+    .msg.bot {
+      background: #fff;
+      color: var(--ink);
+      border-color: var(--line);
+      border-top-left-radius: 6px;
+    }
+
+    .msg.system {
+      max-width: 100%;
+      background: #f7fafc;
+      color: var(--muted);
+      border-color: var(--line);
+      font-size: 13px;
+    }
+
+    .msg.link {
+      display: inline-block;
+      color: var(--brand);
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+
+    .result-stack {
+      display: grid;
+      gap: 10px;
+      white-space: normal;
+    }
+
+    .research-report {
+      display: grid;
+      gap: 12px;
+    }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .report-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .report-card.primary {
+      background:
+        radial-gradient(circle at top right, rgba(15,102,255,0.08), transparent 24%),
+        linear-gradient(180deg, #fff, #fbfdff);
+      border-color: rgba(15,102,255,0.16);
+    }
+
+    .report-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 800;
+    }
+
+    .report-value {
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.5;
+      font-weight: 650;
+    }
+
+    .report-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .report-item {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: linear-gradient(180deg, #fff, #fafcff);
+      display: grid;
+      gap: 4px;
+    }
+
+    .report-item small {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 800;
+    }
+
+    .report-item div {
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .candidate-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .candidate-head {
+      display: grid;
+      gap: 3px;
+    }
+
+    .candidate-head b {
+      font-size: 14px;
+      color: var(--ink);
+    }
+
+    .candidate-head span,
+    .candidate-card p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .score-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .score-pill {
+      min-height: 26px;
+      padding: 0 9px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #f7fafc;
+      color: #415164;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .composer {
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+      background: #fff;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .textarea {
+      width: 100%;
+      min-height: 96px;
+      resize: vertical;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      font: inherit;
+      color: var(--ink);
+      outline: none;
+      line-height: 1.45;
+      background: #fff;
+    }
+
+    .textarea:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(15, 102, 255, 0.12);
+    }
+
+    .btn {
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 10px;
+      border: 1px solid var(--brand);
+      background: var(--brand);
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .footer {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .contacts-toolbar {
+      padding: 14px 18px;
+      display: grid;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .search {
+      width: 100%;
+      min-height: 42px;
+      padding: 0 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      font: inherit;
+      color: var(--ink);
+      outline: none;
+      background: #fff;
+    }
+
+    .search:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(15, 102, 255, 0.12);
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter {
+      min-height: 32px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #314155;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .filter.active {
+      background: var(--brand-soft);
+      border-color: rgba(15, 102, 255, 0.18);
+      color: var(--brand);
+    }
+
+    .contacts-body {
+      min-height: 0;
+      overflow: auto;
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .contacts-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .contact-item {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      display: grid;
+      grid-template-columns: 84px minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+    }
+
+    .contact-item:hover {
+      transform: translateY(-1px);
+      border-color: rgba(15, 102, 255, 0.28);
+      box-shadow: 0 12px 24px rgba(15, 35, 60, 0.08);
+      background: linear-gradient(180deg, rgba(255,255,255,1), rgba(248,251,255,1));
+    }
+
+    .contact-item .photo {
+      width: 84px;
+      height: 84px;
+      border-radius: 18px;
+    }
+
+    .contact-name {
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .contact-role {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+      line-height: 1.45;
+    }
+
+    .contact-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .meta-pill {
+      min-height: 26px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: #f7fafc;
+      border: 1px solid var(--line);
+      color: #415164;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .contact-arrow {
+      color: var(--brand);
+      font-weight: 800;
+      font-size: 18px;
+      padding: 0 4px;
+    }
+
+    .profile {
+      display: grid;
+      grid-template-columns: 132px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .photo {
+      width: 132px;
+      height: 132px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #dfe8f3;
+      flex: 0 0 auto;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35);
+    }
+
+    .photo img, .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .name-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 24px;
+      line-height: 1.15;
+    }
+
+    .role {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      min-height: 30px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #324355;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .section {
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .kv {
+      display: grid;
+      gap: 4px;
+    }
+
+    .kv small {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .kv div {
+      line-height: 1.5;
+      color: var(--ink);
+    }
+
+    .cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .cloud .node {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,102,255,0.16);
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-size: 13px;
+      font-weight: 650;
+      text-decoration: none;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .row-item {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      display: grid;
+      gap: 4px;
+    }
+
+    .row-item b {
+      font-size: 14px;
+    }
+
+    .row-item span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .post {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      display: grid;
+      gap: 10px;
+    }
+
+    .post-top {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+    }
+
+    .thumb {
+      width: 72px;
+      height: 72px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #e7edf5;
+      border: 1px solid rgba(0,0,0,0.04);
+      flex: 0 0 auto;
+    }
+
+    .post b {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .post p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .link-pill {
+      min-height: 30px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,102,255,0.18);
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-size: 12px;
+      font-weight: 650;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .line-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 0 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(15,102,255,0.18);
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-weight: 650;
+      text-decoration: none;
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .secondary-btn {
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #314155;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(16, 26, 41, 0.42);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 50;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(1240px, 100%);
+      max-height: min(94vh, 1080px);
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 24px 60px rgba(10, 18, 28, 0.26);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .modal-top {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(180deg, rgba(15, 102, 255, 0.03), transparent);
+    }
+
+    .modal-body {
+      min-height: 0;
+      overflow: auto;
+      padding: 18px;
+      background:
+        linear-gradient(180deg, rgba(243,247,251,0.9), rgba(255,255,255,0.9));
+    }
+
+    .card-shell {
+      display: grid;
+      gap: 14px;
+    }
+
+    .card-hero {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at top right, rgba(15,102,255,0.08), transparent 22%),
+        radial-gradient(circle at left center, rgba(46,196,182,0.08), transparent 20%),
+        #fff;
+      box-shadow: 0 12px 28px rgba(15, 35, 60, 0.06);
+      overflow: hidden;
+    }
+
+    .hero-top {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .hero-visual {
+      display: grid;
+      gap: 10px;
+      justify-items: start;
+    }
+
+    .visual-stack {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+
+    .visual-stack .photo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .visual-stack .photo.stack-back {
+      transform: translate(10px, 10px) scale(0.9);
+      opacity: 0.72;
+      filter: saturate(0.9);
+    }
+
+    .visual-stack .photo.stack-mid {
+      transform: translate(5px, 5px) scale(0.95);
+      opacity: 0.88;
+    }
+
+    .visual-stack .photo.stack-front {
+      z-index: 2;
+    }
+
+    .visual-caption {
+      display: grid;
+      gap: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .visual-caption strong {
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .hero-copy {
+      min-width: 0;
+    }
+
+    .hero-side {
+      min-width: 180px;
+      display: grid;
+      gap: 10px;
+      justify-items: end;
+    }
+
+    .hero-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .hero-desc {
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      padding: 0 16px 16px;
+    }
+
+    .hero-metric {
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(15,102,255,0.12);
+      background: rgba(255,255,255,0.84);
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .hero-metric small {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+    }
+
+    .hero-metric b {
+      font-size: 14px;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.95fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .card-col {
+      display: grid;
+      gap: 14px;
+    }
+
+    .card-panel {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 10px 24px rgba(15, 35, 60, 0.05);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(180deg, rgba(15, 102, 255, 0.03), transparent);
+    }
+
+    .panel-head strong {
+      font-size: 13px;
+      letter-spacing: 0.02em;
+    }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .insight-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,252,255,0.98));
+      box-shadow: 0 10px 24px rgba(15, 35, 60, 0.05);
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+      min-height: 132px;
+    }
+
+    .insight-card.primary {
+      background:
+        radial-gradient(circle at top right, rgba(15,102,255,0.09), transparent 30%),
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,251,255,0.98));
+      border-color: rgba(15,102,255,0.16);
+    }
+
+    .insight-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 800;
+    }
+
+    .insight-value {
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.55;
+      font-weight: 650;
+    }
+
+    .insight-note {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .signal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .signal-card {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #fff, #fbfdff);
+      display: grid;
+      gap: 6px;
+    }
+
+    .signal-card small {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .signal-card b {
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .mini-gallery {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .mini-shot {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 10px 24px rgba(15, 35, 60, 0.04);
+    }
+
+    .mini-shot .thumb {
+      width: 100%;
+      height: 120px;
+      border: 0;
+      border-radius: 0;
+      background: #e7edf5;
+    }
+
+    .mini-shot .mini-copy {
+      padding: 10px 12px 12px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .mini-shot .mini-copy b {
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .mini-shot .mini-copy span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .detail-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail-group {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .detail-group summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: linear-gradient(180deg, rgba(15,102,255,0.03), transparent);
+      font-weight: 750;
+      color: var(--ink);
+    }
+
+    .detail-group summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .detail-group summary span {
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .detail-body {
+      padding: 12px 14px 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail-row {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: linear-gradient(180deg, #fff, #fbfdff);
+      display: grid;
+      gap: 4px;
+    }
+
+    .detail-row small {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 800;
+    }
+
+    .detail-row div {
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .panel-body {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .panel-grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .field-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      display: grid;
+      gap: 4px;
+      background: linear-gradient(180deg, #fff, #fafcff);
+    }
+
+    .field-card small {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+    }
+
+    .field-card div {
+      color: var(--ink);
+      line-height: 1.45;
+      font-size: 13px;
+      word-break: break-word;
+    }
+
+    .timeline-note {
+      padding: 12px;
+      border-radius: 14px;
+      background: #f8fbff;
+      border: 1px solid rgba(15,102,255,0.14);
+      color: #33465b;
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .close {
+      min-height: 36px;
+      width: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #314155;
+      font: inherit;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    @media (max-width: 1120px) {
+      .shell { grid-template-rows: auto auto auto; }
+      .panel { min-height: 560px; }
+      .insight-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .signal-grid { grid-template-columns: 1fr; }
+      .mini-gallery { grid-template-columns: 1fr; }
+      .report-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      body { padding: 10px; }
+      .shell { min-height: calc(100vh - 20px); gap: 10px; }
+      .header { padding: 14px; }
+      .tabs { padding: 8px; }
+      .input-row { grid-template-columns: 1fr; }
+      .btn { width: 100%; }
+      .profile { grid-template-columns: 1fr; }
+      .photo { width: 100%; height: 220px; }
+      .post-top { grid-template-columns: 1fr; }
+      .thumb { width: 100%; height: 180px; }
+      h2 { font-size: 21px; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .contact-item { grid-template-columns: 72px minmax(0, 1fr) auto; padding: 12px; }
+      .contact-item .photo { width: 72px; height: 72px; border-radius: 16px; }
+      .contact-name { font-size: 15px; }
+      .contacts-body { padding: 12px; }
+      .messages { padding: 14px; }
+      .chat-top, .contacts-top { padding: 12px 14px; }
+      .contacts-toolbar { padding: 12px 14px; }
+      .modal { padding: 0; align-items: stretch; justify-content: stretch; }
+      .modal-card { width: 100%; height: 100%; max-height: none; border-radius: 0; }
+      .modal-body { padding: 14px; }
+      .close { min-height: 40px; width: 40px; }
+      .hero-top { grid-template-columns: 1fr; }
+      .hero-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .card-grid { grid-template-columns: 1fr; }
+      .panel-grid.three, .panel-grid { grid-template-columns: 1fr; }
+      .insight-grid { grid-template-columns: 1fr; }
+      .hero-side { justify-items: start; min-width: 0; }
+      .visual-stack { width: 100%; max-width: 180px; }
+      .report-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="header">
+      <h1>Carte Showbiz</h1>
+      <div class="status"><span class="dot"></span><span id="mode-label">мессенджер</span></div>
+    </section>
+
+    <section class="tabs">
+      <button class="tab active" data-tab="parse">Парсинг</button>
+      <button class="tab" data-tab="contacts">Контакты</button>
+    </section>
+
+    <section class="panel">
+      <div class="view chat-view active" id="parse-view">
+        <div class="chat-top">
+          <div class="title">Парсинг / сбор</div>
+          <div class="status"><span class="dot"></span><span>готов</span></div>
+        </div>
+        <div class="messages" id="messages">
+          <div class="msg system">Пиши задачу обычным языком. Я разложу ее на поиск, верификацию, связи и запись в CRM.</div>
+          <div class="msg bot">Например: "покажи Fargo", "найди и верифицируй 20 новых продюсеров", "собери связи по этому артисту".</div>
+        </div>
+        <div class="composer">
+          <div class="input-row">
+            <textarea id="prompt" class="textarea">Покажи Fargo.</textarea>
+            <button class="btn" id="send">Отправить</button>
+          </div>
+          <div class="footer" id="counter">2 сообщения</div>
+        </div>
+      </div>
+
+      <div class="view contacts-view" id="contacts-view">
+        <div class="contacts-top">
+          <div class="title">Контакты</div>
+          <div class="status"><span class="dot"></span><span id="contacts-count">10 контактов</span></div>
+        </div>
+        <div class="contacts-toolbar">
+          <div class="search-row">
+            <input id="search" class="search" type="search" placeholder="Поиск по имени, роли, лейблу или каналу">
+            <div class="status"><span class="dot"></span><span id="active-filter">все</span></div>
+          </div>
+          <div class="filters" id="filters"></div>
+        </div>
+        <div class="contacts-body">
+          <div class="contacts-list" id="contacts-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-top">
+        <div class="title" id="modal-title">Карточка контакта</div>
+        <button class="close" id="modal-close" type="button">×</button>
+      </div>
+      <div class="modal-body" id="card-body"></div>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const isMobileMode = params.get('mobile') === '1';
+    const placement = params.get('placement') || '';
+    const placementOptionsRaw = params.get('placement_options') || '';
+    const memberId = params.get('member_id') || '';
+    let placementOptions = {};
+    try {
+      placementOptions = placementOptionsRaw ? JSON.parse(placementOptionsRaw) : {};
+    } catch (_) {
+      placementOptions = {};
+    }
+    document.body.classList.toggle('mobile-mode', isMobileMode);
+    const placementLabel = placement
+      ? (placement.startsWith('CRM_') ? 'CRM detail' : placement)
+      : (isMobileMode ? 'mobile test' : 'мессенджер');
+    document.getElementById('mode-label').textContent = placementLabel;
+    document.title = isMobileMode ? 'Carte Showbiz Mobile' : 'Carte Showbiz';
+
+    const messages = document.getElementById('messages');
+    const prompt = document.getElementById('prompt');
+    const send = document.getElementById('send');
+    const counter = document.getElementById('counter');
+    const cardBody = document.getElementById('card-body');
+    const modal = document.getElementById('modal');
+    const modalClose = document.getElementById('modal-close');
+    const modalTitle = document.getElementById('modal-title');
+    const tabs = document.querySelectorAll('.tab');
+    const parseView = document.getElementById('parse-view');
+    const contactsView = document.getElementById('contacts-view');
+    const contactsList = document.getElementById('contacts-list');
+    const contactsCount = document.getElementById('contacts-count');
+    const filters = document.getElementById('filters');
+    const search = document.getElementById('search');
+    const activeFilter = document.getElementById('active-filter');
+    const header = document.querySelector('.header');
+    let count = 2;
+    const storageKey = isMobileMode ? 'carte-showbiz-mobile' : 'carte-showbiz-desktop';
+
+    const photo = (bg, face = '#f2c8a8', accent = '#1e2a39') => `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
+        <rect width="320" height="320" rx="40" fill="${bg}"/>
+        <circle cx="160" cy="114" r="76" fill="rgba(255,255,255,0.12)"/>
+        <circle cx="160" cy="162" r="56" fill="${face}"/>
+        <path d="M126 180c8-28 24-44 40-44s36 8 48 32c-8 16-24 24-48 24s-30-4-40-12z" fill="${accent}"/>
+      </svg>
+    `)}`;
+
+    const thumb = (id) => `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+        <defs>
+          <linearGradient id="bg${id}" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#0f66ff"/>
+            <stop offset="100%" stop-color="#2ec4b6"/>
+          </linearGradient>
+        </defs>
+        <rect width="180" height="180" rx="28" fill="url(#bg${id})"/>
+        <circle cx="50" cy="54" r="18" fill="rgba(255,255,255,0.28)"/>
+        <rect x="24" y="104" width="132" height="18" rx="9" fill="rgba(255,255,255,0.34)"/>
+        <rect x="24" y="130" width="98" height="14" rx="7" fill="rgba(255,255,255,0.2)"/>
+      </svg>
+    `)}`;
+
+    const data = {
+      fargo: {
+        id: 'fargo',
+        name: 'Fargo',
+        role: 'Продюсер / артист',
+        types: ['продюсер', 'артист'],
+        summary: 'Работает на пересечении релизов, продюсирования и коллабораций. Хорошо видны связи с артистами, лейблами и концертными агентами.',
+        photo: photo('#0f66ff', '#f6d5be', '#1b2430'),
+        tags: ['верифицирован', 'релизы', 'связи', 'Fargo'],
+        links: ['Instagram: @fargo', 'Telegram: t.me/fargo', 'VK: vk.com/fargo', 'Spotify artist page'],
+        stats: [
+          ['Профессия', 'Продюсер, артист'],
+          ['Связи', '11 артистов, 4 агента'],
+          ['Лейблы', '3 подтвержденных'],
+          ['Прослушивания', '1.8M суммарно']
+        ],
+        cloud: [
+          { key: 'artem', label: 'Artem V.' },
+          { key: 'arstudio', label: 'A&R Studio' },
+          { key: 'moskvalive', label: 'Moskva Live' },
+          { key: 'lunabeat', label: 'Luna Beat' },
+          { key: 'olegstage', label: 'Oleg Stage' },
+          { key: 'echolabel', label: 'Echo Label' },
+          { key: 'ninawave', label: 'Nina Wave' },
+          { key: 'sasham', label: 'Sasha M.' }
+        ],
+        posts: [
+          ['1', 'Новый сингл и продакшн-сессия', 'Анонс совместного релиза с отметками соавторов и студии.'],
+          ['2', 'Stories с репетиции', 'Фрагмент подготовки к лайв-сету и анонс ближайшего выступления.'],
+          ['3', 'Пост о коллаборации', 'Коллаборация с артистом и ссылка на стриминг-платформы.']
+        ]
+      },
+      artem: {
+        id: 'artem',
+        name: 'Artem V.',
+        role: 'Артист / автор',
+        types: ['артист'],
+        summary: 'Плотный релизный график и аккуратная публичная подача.',
+        photo: photo('#0f66ff', '#f3c9a5'),
+        tags: ['артист', 'вокал', 'новый'],
+        links: ['Instagram: @artemv', 'VK: vk.com/artemv', 'Spotify artist page'],
+        stats: [
+          ['Профессия', 'Артист'],
+          ['Связи', '6 артистов, 2 лейбла'],
+          ['Лейблы', '2'],
+          ['Прослушивания', '420K суммарно']
+        ],
+        cloud: [
+          { key: 'fargo', label: 'Fargo' },
+          { key: 'echolabel', label: 'Echo Label' },
+          { key: 'ninawave', label: 'Nina Wave' },
+          { key: 'club17', label: 'Club 17' }
+        ],
+        posts: [
+          ['1', 'Новый релиз', 'Свежий сингл и визуал к нему.'],
+          ['2', 'Коллаборация', 'Анонс совместного трека с Fargo.']
+        ]
+      },
+      arstudio: {
+        id: 'arstudio',
+        name: 'A&R Studio',
+        role: 'Лейбл / A&R',
+        types: ['лейбл'],
+        summary: 'Лейбл и точка соединения артистов с релизами.',
+        photo: photo('#0a9f83', '#f3f7fb'),
+        tags: ['лейбл', 'A&R'],
+        links: ['Instagram: @arstudio', 'Website', 'VK'],
+        stats: [
+          ['Профессия', 'Лейбл / A&R'],
+          ['Связи', '8 артистов, 5 продюсеров'],
+          ['Лейблы', '1'],
+          ['Прослушивания', '—']
+        ],
+        cloud: [{ key: 'fargo', label: 'Fargo' }, { key: 'artem', label: 'Artem V.' }],
+        posts: [['1', 'Подбор артистов', 'Новая подборка артистов в работу.']]
+      },
+      moskvalive: {
+        id: 'moskvalive',
+        name: 'Moskva Live',
+        role: 'Площадка / ивенты',
+        types: ['площадка'],
+        summary: 'Публичная площадка, часто связывает артистов и продюсеров.',
+        photo: photo('#1e2a39', '#f7fafc'),
+        tags: ['площадка', 'ивенты'],
+        links: ['Instagram: @moskvalive', 'VK', 'Site'],
+        stats: [
+          ['Профессия', 'Площадка'],
+          ['Связи', '3 артиста, 2 агента'],
+          ['Лейблы', '—'],
+          ['Прослушивания', '—']
+        ],
+        cloud: [{ key: 'fargo', label: 'Fargo' }, { key: 'olegstage', label: 'Oleg Stage' }],
+        posts: [['1', 'Афиша недели', 'Лайн-ап ближайших событий и лайвов.']]
+      },
+      lunabeat: {
+        id: 'lunabeat',
+        name: 'Luna Beat',
+        role: 'Продюсер / артист',
+        types: ['продюсер', 'артист'],
+        summary: 'Соседняя творческая сущность с сильными коллаборациями.',
+        photo: photo('#7d5cff', '#f4cfaf'),
+        tags: ['артист', 'продюсер'],
+        links: ['Instagram: @lunabeat', 'Spotify', 'Telegram'],
+        stats: [
+          ['Профессия', 'Продюсер, артист'],
+          ['Связи', '4 артиста, 2 лейбла'],
+          ['Лейблы', '2'],
+          ['Прослушивания', '260K']
+        ],
+        cloud: [{ key: 'fargo', label: 'Fargo' }, { key: 'artem', label: 'Artem V.' }],
+        posts: [['1', 'Новый трек', 'Сингл с акцентом на коллаборации.']]
+      },
+      olegstage: {
+        id: 'olegstage',
+        name: 'Oleg Stage',
+        role: 'Концертный агент',
+        types: ['агент'],
+        summary: 'Связующий контур по площадкам и туровой активности.',
+        photo: photo('#0f66ff', '#f7fafc'),
+        tags: ['агент', 'тур'],
+        links: ['Telegram', 'VK', 'Site'],
+        stats: [
+          ['Профессия', 'Концертный агент'],
+          ['Связи', '5 артистов, 4 площадки'],
+          ['Лейблы', '—'],
+          ['Прослушивания', '—']
+        ],
+        cloud: [{ key: 'fargo', label: 'Fargo' }, { key: 'moskvalive', label: 'Moskva Live' }],
+        posts: [['1', 'Туровый график', 'Обновление расписания по городам.']]
+      },
+      echolabel: {
+        id: 'echolabel',
+        name: 'Echo Label',
+        role: 'Лейбл',
+        types: ['лейбл'],
+        summary: 'Лейбл с несколькими пересечениями по артистам и продюсерам.',
+        photo: photo('#2ec4b6', '#f7fafc'),
+        tags: ['лейбл'],
+        links: ['Website', 'VK', 'Instagram'],
+        stats: [
+          ['Профессия', 'Лейбл'],
+          ['Связи', '4 артиста, 3 продюсера'],
+          ['Лейблы', '1'],
+          ['Прослушивания', '—']
+        ],
+        cloud: [{ key: 'artem', label: 'Artem V.' }, { key: 'ninawave', label: 'Nina Wave' }],
+        posts: [['1', 'Новый релиз', 'Свежий релиз в каталоге лейбла.']]
+      },
+      ninawave: {
+        id: 'ninawave',
+        name: 'Nina Wave',
+        role: 'Артист / songwriter',
+        types: ['артист'],
+        summary: 'Активный релизный график и пересечения с инди-сценой.',
+        photo: photo('#ff6b6b', '#f2c8a8'),
+        tags: ['артист', 'новый'],
+        links: ['Instagram', 'Spotify', 'Telegram'],
+        stats: [
+          ['Профессия', 'Артист'],
+          ['Связи', '6 артистов, 2 лейбла'],
+          ['Лейблы', '2'],
+          ['Прослушивания', '420K суммарно']
+        ],
+        cloud: [{ key: 'fargo', label: 'Fargo' }, { key: 'echolabel', label: 'Echo Label' }],
+        posts: [['1', 'Новый релиз', 'Свежий сингл и визуал к нему.']]
+      },
+      sasham: {
+        id: 'sasham',
+        name: 'Sasha M.',
+        role: 'Автор / соавтор',
+        types: ['автор', 'соавтор'],
+        summary: 'Саундрайтинг, соавторство и микроколлаборации.',
+        photo: photo('#1a8a4c', '#f2c7a6'),
+        tags: ['соавтор'],
+        links: ['Instagram', 'VK', 'Telegram'],
+        stats: [
+          ['Профессия', 'Автор / соавтор'],
+          ['Связи', '3 артиста, 2 продюсера'],
+          ['Лейблы', '1'],
+          ['Прослушивания', '—']
+        ],
+        cloud: [{ key: 'fargo', label: 'Fargo' }, { key: 'artem', label: 'Artem V.' }],
+        posts: [['1', 'Новая работа', 'Фрагмент новой песни и обратная связь.']]
+      },
+      club17: {
+        id: 'club17',
+        name: 'Club 17',
+        role: 'Площадка',
+        types: ['площадка'],
+        summary: 'Место концертных запусков и точка входа для многих артистов.',
+        photo: photo('#1e2a39', '#f7fafc'),
+        tags: ['площадка'],
+        links: ['Website', 'VK', 'Instagram'],
+        stats: [
+          ['Профессия', 'Площадка'],
+          ['Связи', '4 артиста, 1 агент'],
+          ['Лейблы', '—'],
+          ['Прослушивания', '—']
+        ],
+        cloud: [{ key: 'moskvalive', label: 'Moskva Live' }, { key: 'fargo', label: 'Fargo' }],
+        posts: [['1', 'Афиша', 'Новая афиша и ближайшие шоу.']]
+      }
+    };
+
+    Object.entries(data).forEach(([id, person]) => {
+      if (!person.communication) {
+        const communicationDefaults = {
+          fargo: {
+            awaitingReply: false,
+            lastTouchDays: 1,
+            replyDue: 'today',
+            stageHint: 'active_dialog',
+            responsePriority: 42,
+            nextAction: 'держать связь и предлагать коллаборацию'
+          },
+          lunabeat: {
+            awaitingReply: true,
+            lastTouchDays: 0,
+            replyDue: 'today',
+            stageHint: 'waiting_reply',
+            responsePriority: 84,
+            nextAction: 'ответить с контекстом и предложить следующий шаг'
+          },
+          olegstage: {
+            awaitingReply: true,
+            lastTouchDays: 3,
+            replyDue: 'today',
+            stageHint: 'waiting_reply',
+            responsePriority: 91,
+            nextAction: 'срочно написать и закрыть вопрос по площадкам'
+          }
+        };
+        person.communication = communicationDefaults[id] || {
+          awaitingReply: false,
+          lastTouchDays: 5,
+          replyDue: 'not urgent',
+          stageHint: 'active_dialog',
+          responsePriority: 20,
+          nextAction: 'поддерживать контакт'
+        };
+      }
+    });
+
+    const contactTypes = ['все', 'артист', 'продюсер', 'лейбл', 'площадка', 'агент', 'автор', 'соавтор'];
+    let activeType = 'все';
+    let activeQuery = '';
+    let activeTab = 'parse';
+    const placementEntityId = placementOptions.ID || placementOptions.id || '';
+    const placementEntityType = placementOptions.ENTITY_TYPE || placementOptions.entityType || '';
+    const runtime = {
+      placement,
+      placementOptions,
+      memberId,
+      mobile: isMobileMode
+    };
+
+    if (placement) {
+      const banner = document.createElement('div');
+      banner.className = 'placement-banner';
+      banner.innerHTML = `
+        <div>
+          <strong>${placementLabel}</strong>
+          <span>${placementEntityType ? `${placementEntityType} ` : ''}${placementEntityId ? `#${placementEntityId}` : ''}${memberId ? ` · ${memberId}` : ''}</span>
+        </div>
+        <div>Handler-ready</div>
+      `;
+      header.insertAdjacentElement('afterend', banner);
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        if (saved.tab && ['parse', 'contacts'].includes(saved.tab)) activeTab = saved.tab;
+        if (saved.type && contactTypes.includes(saved.type)) activeType = saved.type;
+        if (typeof saved.query === 'string') activeQuery = saved.query;
+      } catch (_) {}
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({
+          tab: activeTab,
+          type: activeType,
+          query: activeQuery
+        }));
+      } catch (_) {}
+    }
+
+    function setTab(name) {
+      activeTab = name;
+      tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.tab === name));
+      parseView.classList.toggle('active', name === 'parse');
+      contactsView.classList.toggle('active', name === 'contacts');
+      if (name === 'contacts') renderContacts();
+      saveState();
+    }
+
+    function renderMessages() {
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function append(role, text, html = false) {
+      const el = document.createElement('div');
+      el.className = `msg ${role}`;
+      if (html) {
+        el.innerHTML = text;
+      } else {
+        el.textContent = text;
+      }
+      messages.appendChild(el);
+      renderMessages();
+      if (role !== 'system') {
+        count += 1;
+        counter.textContent = `${count} сообщений`;
+      }
+      return el;
+    }
+
+    function renderFilters() {
+      filters.innerHTML = contactTypes.map(type => `
+        <button class="filter ${type === activeType ? 'active' : ''}" type="button" data-filter="${type}">${type}</button>
+      `).join('');
+      filters.querySelectorAll('[data-filter]').forEach(button => {
+        button.addEventListener('click', () => {
+          activeType = button.dataset.filter;
+          activeFilter.textContent = activeType;
+          renderFilters();
+          renderContacts();
+          saveState();
+        });
+      });
+    }
+
+    function matchesContact(person) {
+      const text = [person.name, person.role, person.summary, ...(person.tags || []), ...(person.links || [])]
+        .join(' ')
+        .toLowerCase();
+      const matchesType = activeType === 'все' || (person.types || []).includes(activeType);
+      const matchesQuery = !activeQuery || text.includes(activeQuery);
+      return matchesType && matchesQuery;
+    }
+
+    function renderContacts() {
+      const people = Object.values(data).filter(matchesContact);
+      contactsCount.textContent = `${people.length} контактов`;
+      contactsList.innerHTML = people.map(person => `
+        <div class="contact-item" data-open-contact="${person.id}" role="button" tabindex="0">
+          <div class="photo"><img alt="${person.name}" src="${person.photo}"></div>
+          <div>
+            <div class="contact-name">${person.name}</div>
+            <div class="contact-role">${person.role}</div>
+            <div class="contact-meta">
+              ${(person.types || []).map(type => `<span class="meta-pill">${type}</span>`).join('')}
+            </div>
+          </div>
+          <div class="contact-arrow">›</div>
+        </div>
+      `).join('');
+
+      contactsList.querySelectorAll('[data-open-contact]').forEach(item => {
+        const open = () => openCard(data[item.dataset.openContact]);
+        item.addEventListener('click', open);
+        item.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            open();
+          }
+        });
+      });
+    }
+
+    function buildBitrixProfile(person) {
+      const dossier = person.dossier || person.bitrixPreview?.dossier || null;
+      const communication = dossier?.bitrixFields?.UF_CRM_MUSIC_STAGE_HINT
+        ? {
+            awaitingReply: String(dossier.bitrixFields.UF_CRM_MUSIC_STAGE_HINT).includes('WAITING'),
+            stageHint: dossier.bitrixFields.UF_CRM_MUSIC_STAGE_HINT,
+            replyDue: dossier.bitrixFields.UF_CRM_MUSIC_REPLY_DEADLINE || 'today',
+            nextAction: dossier.bitrixFields.UF_CRM_MUSIC_NEXT_ACTION || 'поддерживать контакт',
+            urgencyScore: Number(String(dossier.bitrixFields.UF_CRM_MUSIC_URGENCY_SCORE || 0).replace(/[^\d]/g, '')) || 0,
+            responseStatus: dossier.bitrixFields.UF_CRM_MUSIC_RESPONSE_STATUS || 'active_dialog'
+          }
+        : (person.communication || person.dossier?.communication || null);
+      const city = person.types.includes('площадка') ? 'Москва' : 'Москва / online';
+      const genres = person.types.includes('артист') || person.types.includes('продюсер')
+        ? ['hip-hop', 'pop', 'electronic']
+        : ['music business'];
+      const joinLines = (items, fallback = '—') => items.length ? items.join('<br>') : fallback;
+      const joinText = (items, fallback = '—') => items.length ? items.join(', ') : fallback;
+      const followers = Number(String((person.stats.find(([k]) => k === 'Прослушивания')?.[1] || '0')).replace(/[^\d]/g, '')) || 0;
+      const confidence = person.id === 'fargo' ? 92 : 78;
+      const priorityScore = person.id === 'fargo' ? 97 : 74;
+      const priorityTier = priorityScore >= 90 ? 'A+' : priorityScore >= 80 ? 'A' : 'B';
+      const sourceBase = person.links.map(link => `https://example.com/source/${person.id}/${encodeURIComponent(link)}`);
+      const socialBase = person.links.map(link => link.includes('http') ? link : `https://example.com/social/${person.id}`);
+      const relationNames = person.cloud.map(item => item.label);
+      const contactStatus = person.id === 'fargo' ? 'complete' : 'partial';
+      const readyForOutreach = person.id === 'fargo';
+      const mainInsight = person.id === 'fargo'
+        ? 'Сильный узел сцены: много пересечений, есть понятный заход через общие связи и релизы.'
+        : 'Есть базовый social footprint и понятная роль, но не хватает прямых контактных точек.';
+      const actionInsight = person.id === 'fargo'
+        ? 'Лучший заход через общие релизы, коллаборации и людей из облака связей.'
+        : 'Лучше начинать с recent posts, collabs и общих знакомых, а затем добирать контакты.';
+      const riskInsight = readyForOutreach
+        ? 'Главный риск в точности сегментации, а не в недостатке данных.'
+        : 'Риск в том, что без email/phone outreach будет менее прямым.';
+      const nextStepInsight = readyForOutreach
+        ? 'Можно сразу запускать точечный outreach.'
+        : 'Сначала добрать email, phone и один тёплый ввод.';
+      const communicationInsight = communication
+        ? (communication.awaitingReply
+          ? `Сейчас у контакта стадия ${communication.stageHint}. Ответ нужен, приоритет ${communication.urgencyScore}/100.`
+          : `Контакт в стадии ${communication.stageHint}. Писать можно без срочности, но с контекстом.`)
+        : 'Коммуникационный статус пока не заполнен.';
+      const insightBlocks = [
+        { label: 'Главный вывод', value: mainInsight, tone: 'primary' },
+        { label: 'Как заходить', value: actionInsight },
+        { label: 'Риск', value: riskInsight },
+        { label: 'Следующий шаг', value: nextStepInsight }
+      ];
+      const rawGroups = [
+        {
+          title: 'Профиль',
+          meta: 'основные сигналы',
+          items: [
+            ['UF_CRM_MUSIC_ENTITY_KIND', person.types[0] || 'contact'],
+            ['UF_CRM_MUSIC_CITY', city],
+            ['UF_CRM_MUSIC_GENRES', genres.join(', ')],
+            ['UF_CRM_MUSIC_FIT', person.id === 'fargo' ? 'Высокий' : 'Средний'],
+            ['UF_CRM_MUSIC_SERVICES', person.id === 'fargo'
+              ? ['Продюсирование', 'Feat', 'Booking', 'Release support'].join(', ')
+              : ['Аналитика', 'Коллаборации'].join(', ')]
+          ]
+        },
+        {
+          title: 'Оценка',
+          meta: 'приоритет и доверие',
+          items: [
+            ['UF_CRM_MUSIC_CONFIDENCE', `${confidence}%`],
+            ['UF_CRM_MUSIC_PRIORITY_SCORE', String(priorityScore)],
+            ['UF_CRM_MUSIC_PRIORITY_TIER', priorityTier],
+            ['UF_CRM_MUSIC_PRIORITY_REASON', person.id === 'fargo'
+              ? 'Наличие подтвержденных связей, релизов и прямых каналов.'
+              : 'Есть базовый social footprint и понятная роль в сцене.'],
+            ['UF_CRM_MUSIC_DISCOVERY_MODE', 'manual search'],
+            ['UF_CRM_MUSIC_DISCOVERED_FROM', 'Carte Showbiz parser'],
+            ['UF_CRM_MUSIC_LINK_STATUS', 'checked'],
+            ['UF_CRM_MUSIC_LAST_RESEARCHED', '2026-06-03 07:06'],
+            ['UF_CRM_MUSIC_LAST_LINK_CHECK', '2026-06-03 07:05']
+          ]
+        },
+        {
+          title: 'Контакт',
+          meta: 'готовность к outreach',
+          items: [
+            ['UF_CRM_MUSIC_CONTACT_STATUS', contactStatus],
+            ['UF_CRM_MUSIC_RESPONSE_STATUS', communication ? communication.responseStatus : 'active_dialog'],
+            ['UF_CRM_MUSIC_RESPONSE_PRIORITY', communication ? String(communication.urgencyScore) : '0'],
+            ['UF_CRM_MUSIC_REPLY_REQUIRED', communication && communication.awaitingReply ? 'Yes' : 'No'],
+            ['UF_CRM_MUSIC_REPLY_DEADLINE', communication ? communication.replyDue : 'today'],
+            ['UF_CRM_MUSIC_STAGE_HINT', communication ? communication.stageHint : 'active_dialog'],
+            ['UF_CRM_MUSIC_NEXT_ACTION', communication ? communication.nextAction : 'поддерживать контакт'],
+            ['UF_CRM_MUSIC_CONTACT_METHODS', joinLines(person.links.slice(0, 3))],
+            ['UF_CRM_MUSIC_MISSING_DATA', joinText(person.id === 'fargo' ? ['direct email'] : ['email', 'phone', 'direct intro'])],
+            ['UF_CRM_MUSIC_READY_FOR_OUTREACH', readyForOutreach ? 'Yes' : 'No'],
+            ['UF_CRM_MUSIC_FOLLOWERS', String(followers)],
+            ['UF_CRM_MUSIC_APPROACH', actionInsight],
+            ['UF_CRM_MUSIC_COMMUNICATION_NOTE', communicationInsight]
+          ]
+        },
+        {
+          title: 'Срочность',
+          meta: 'кому писать сейчас',
+          items: [
+            ['UF_CRM_MUSIC_RESPONSE_STATUS', communication ? communication.responseStatus : 'active_dialog'],
+            ['UF_CRM_MUSIC_RESPONSE_PRIORITY', communication ? String(communication.urgencyScore) : '0'],
+            ['UF_CRM_MUSIC_REPLY_REQUIRED', communication && communication.awaitingReply ? 'Yes' : 'No'],
+            ['UF_CRM_MUSIC_REPLY_DEADLINE', communication ? communication.replyDue : 'today'],
+            ['UF_CRM_MUSIC_STAGE_HINT', communication ? communication.stageHint : 'active_dialog'],
+            ['UF_CRM_MUSIC_NEXT_ACTION', communication ? communication.nextAction : 'поддерживать контакт']
+          ]
+        },
+        {
+          title: 'Связи',
+          meta: 'люди и коллаборации',
+          items: [
+            ['UF_CRM_MUSIC_RELATIONS', joinText(relationNames)],
+            ['UF_CRM_MUSIC_COLLAB_CONTACTS', joinText(relationNames.slice(0, 4))],
+            ['UF_CRM_MUSIC_FEAT_CONTACTS', joinText(relationNames.slice(0, 3))],
+            ['UF_CRM_MUSIC_PRODUCED_FOR_CONTACTS', joinText(relationNames.slice(0, 3))],
+            ['UF_CRM_MUSIC_MANAGER_OF_CONTACTS', joinText(relationNames.slice(0, 2))],
+            ['UF_CRM_MUSIC_ENGINEER_FOR_CONTACTS', joinText(relationNames.slice(0, 1))],
+            ['UF_CRM_MUSIC_VIDEO_WITH_CONTACTS', joinText(relationNames.slice(0, 2))],
+            ['UF_CRM_MUSIC_WARM_INTRO_CONTACTS', joinText(relationNames.slice(0, 2))]
+          ]
+        },
+        {
+          title: 'Соцсети и источники',
+          meta: 'проверка фактов',
+          items: [
+            ['UF_CRM_MUSIC_SOCIALS', joinLines(socialBase)],
+            ['UF_CRM_MUSIC_WORKING_SOCIALS', joinLines(person.links)],
+            ['UF_CRM_MUSIC_CONTACT_URLS', joinLines(person.links)],
+            ['UF_CRM_MUSIC_SOURCES', joinLines(sourceBase)]
+          ]
+        },
+        {
+          title: 'Роли',
+          meta: 'кто это в сцене',
+          items: [
+            ['UF_CRM_MUSIC_IS_ARTIST', person.types.includes('артист') ? 'Yes' : 'No'],
+            ['UF_CRM_MUSIC_IS_VOCALIST', person.id === 'artem' || person.id === 'ninawave' ? 'Yes' : 'No'],
+            ['UF_CRM_MUSIC_IS_PRODUCER', person.types.includes('продюсер') ? 'Yes' : 'No'],
+            ['UF_CRM_MUSIC_IS_BEATMAKER', person.types.includes('продюсер') ? 'Yes' : 'No'],
+            ['UF_CRM_MUSIC_IS_SONGWRITER', person.types.includes('автор') || person.types.includes('соавтор') ? 'Yes' : 'No'],
+            ['UF_CRM_MUSIC_IS_MANAGER', person.types.includes('агент') ? 'Yes' : 'No'],
+            ['UF_CRM_MUSIC_IS_ENGINEER', 'No'],
+            ['UF_CRM_MUSIC_IS_DJ', person.id === 'fargo' ? 'Yes' : 'No'],
+            ['UF_CRM_MUSIC_IS_VIDEO_CREATOR', person.id === 'club17' ? 'Yes' : 'No']
+          ]
+        },
+        {
+          title: 'Yandex Music',
+          meta: 'публичная метрика',
+          items: [
+            ['UF_CRM_MUSIC_YANDEX_ARTIST_URL', person.links.find(link => link.toLowerCase().includes('spotify')) || person.links[0] || '—'],
+            ['UF_CRM_MUSIC_YANDEX_ARTIST_ID', `ym_${person.id}`],
+            ['UF_CRM_MUSIC_YANDEX_MONTHLY_LISTENERS', String(followers ? Math.round(followers / 4) : 0)],
+            ['UF_CRM_MUSIC_YANDEX_PLAYS', String(followers ? followers * 12 : 0)],
+            ['UF_CRM_MUSIC_YANDEX_LIKES_COUNT', String(followers ? Math.round(followers / 10) : 0)],
+            ['UF_CRM_MUSIC_YANDEX_CARD_STATUS', person.id === 'fargo' ? 'verified' : 'draft']
+          ]
+        }
+      ];
+
+      return {
+        entityKind: person.types[0] || 'contact',
+        city,
+        genres,
+        fit: person.id === 'fargo' ? 'Высокий' : 'Средний',
+        services: person.id === 'fargo'
+          ? ['Продюсирование', 'Feat', 'Booking', 'Release support']
+          : ['Аналитика', 'Коллаборации'],
+        sources: sourceBase,
+        socials: socialBase,
+        summary: person.summary,
+        aiNotes: person.id === 'fargo'
+          ? 'Сильный узел сцены: много пересечений, подходит для точечного outreach и коллабораций.'
+          : 'Достаточно данных для первичной верификации и обогащения CRM.',
+        approach: person.id === 'fargo'
+          ? 'Через общие релизы и людей из облака связей'
+          : 'Через recent posts, collabs и общих знакомых',
+        relations: relationNames,
+        confidence,
+        lastResearched: '2026-06-03 07:06',
+        followers,
+        priorityScore,
+        priorityTier,
+        priorityReason: person.id === 'fargo'
+          ? 'Наличие подтвержденных связей, релизов и прямых каналов.'
+          : 'Есть базовый social footprint и понятная роль в сцене.',
+        discoveryMode: 'manual search',
+        discoveredFrom: 'Carte Showbiz parser',
+        linkStatus: 'checked',
+        lastLinkCheck: '2026-06-03 07:05',
+        workingSocials: person.links,
+        isArtist: person.types.includes('артист'),
+        isProducer: person.types.includes('продюсер'),
+        isVocalist: person.id === 'artem' || person.id === 'ninawave',
+        isBeatmaker: person.types.includes('продюсер'),
+        isSongwriter: person.types.includes('автор') || person.types.includes('соавтор'),
+        isManager: person.types.includes('агент'),
+        isEngineer: false,
+        isDj: person.id === 'fargo',
+        isVideoCreator: person.id === 'club17',
+        collabs: relationNames.slice(0, 4),
+        feats: relationNames.slice(0, 3),
+        producedFor: relationNames.slice(0, 3),
+        managerOf: relationNames.slice(0, 2),
+        engineerFor: relationNames.slice(0, 1),
+        videoWith: relationNames.slice(0, 2),
+        warmIntro: relationNames.slice(0, 2),
+        yandex: {
+          url: person.links.find(link => link.toLowerCase().includes('spotify')) || person.links[0] || '',
+          id: `ym_${person.id}`,
+          monthlyListeners: followers ? Math.round(followers / 4) : 0,
+          plays: followers ? followers * 12 : 0,
+          status: person.id === 'fargo' ? 'verified' : 'draft',
+          likes: followers ? Math.round(followers / 10) : 0
+        },
+        contactStatus,
+        contactMethods: person.links.slice(0, 3),
+        missingData: person.id === 'fargo' ? ['direct email'] : ['email', 'phone', 'direct intro'],
+        readyForOutreach,
+        communication,
+        insightBlocks,
+        rawGroups,
+        topPosts: person.posts.slice(0, 3),
+        dossier
+      };
+    }
+
+    function openCard(person) {
+      if (!person) return;
+      const profile = buildBitrixProfile(person);
+      modalTitle.textContent = person.name;
+      const dossierGroups = profile.dossier?.fieldGroups || [];
+      const dossierFields = profile.dossier?.bitrixFields || {};
+      cardBody.innerHTML = `
+        <div class="card-shell">
+          <div class="card-hero">
+            <div class="hero-top">
+              <div class="hero-visual">
+                <div class="visual-stack">
+                  <div class="photo stack-back"><img alt="${person.name}" src="${thumb(`${person.id}-stack-1`)}"></div>
+                  <div class="photo stack-mid"><img alt="${person.name}" src="${thumb(`${person.id}-stack-2`)}"></div>
+                  <div class="photo stack-front"><img alt="${person.name}" src="${person.photo}"></div>
+                </div>
+                <div class="visual-caption">
+                  <strong>Главный визуальный сигнал</strong>
+                  <span>${person.posts[0] ? person.posts[0][1] : 'Профиль без обложки'}</span>
+                </div>
+              </div>
+              <div class="hero-copy">
+                <div class="name-row">
+                  <h2>${person.name}</h2>
+                  <span class="status"><span class="dot"></span><span>${profile.contactStatus}</span></span>
+                </div>
+                <div class="role">${person.role}</div>
+                <div class="chips">
+                  ${person.tags.map(tag => `<span class="chip">${tag}</span>`).join('')}
+                  <span class="chip">${profile.entityKind}</span>
+                  <span class="chip">${profile.city}</span>
+                </div>
+                <div class="hero-desc">${profile.summary}</div>
+                <div class="hero-line">
+                  <span class="link-pill">${profile.priorityTier} priority</span>
+                  <span class="link-pill">${profile.confidence}% confidence</span>
+                  <span class="link-pill">${profile.readyForOutreach ? 'ready for outreach' : 'needs review'}</span>
+                  <span class="link-pill">${profile.linkStatus}</span>
+                  ${profile.communication ? `<span class="link-pill">${profile.communication.awaitingReply ? 'waiting reply' : 'active dialog'}</span>` : ''}
+                  ${profile.communication ? `<span class="link-pill">stage: ${profile.communication.stageHint}</span>` : ''}
+                </div>
+              </div>
+              <div class="hero-side">
+                <div class="status"><span class="dot"></span><span>${profile.discoveryMode}</span></div>
+                <div class="signal-card">
+                  <small>Вердикт</small>
+                  <b>${profile.priorityTier} · ${profile.priorityScore}</b>
+                  <div class="insight-note">${profile.readyForOutreach ? 'Можно идти в outreach сейчас.' : 'Сначала добираем недостающие контакты.'}</div>
+                </div>
+                ${profile.communication ? `
+                  <div class="signal-card">
+                    <small>Коммуникация</small>
+                    <b>${profile.communication.urgencyScore}/100</b>
+                    <div class="insight-note">${profile.communication.awaitingReply ? 'Ждёт ответа и попадает в срочный список.' : 'В активном диалоге без срочной паузы.'}</div>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+            <div class="hero-metrics">
+              ${person.stats.map(([k, v]) => `
+                <div class="hero-metric">
+                  <small>${k}</small>
+                  <b>${v}</b>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="insight-grid">
+            ${profile.insightBlocks.map((block, index) => `
+              <article class="insight-card ${index === 0 ? 'primary' : ''}">
+                <div class="insight-head">
+                  <span>${block.label}</span>
+                  <span>${index + 1}/4</span>
+                </div>
+                <div class="insight-value">${block.value}</div>
+              </article>
+            `).join('')}
+          </div>
+
+          ${dossierGroups.length ? `
+            <div class="card-panel">
+              <div class="panel-head">
+                <strong>Нейросетевое досье</strong>
+                <span class="status"><span class="dot"></span><span>Bitrix fields</span></span>
+              </div>
+              <div class="panel-body detail-stack">
+                ${dossierGroups.map(group => `
+                  <details class="detail-group" open>
+                    <summary>
+                      <span>${group.title}</span>
+                      <span>${group.meta}</span>
+                    </summary>
+                    <div class="detail-body">
+                      <div class="detail-list">
+                        ${group.items.map(([label, value]) => `
+                          <div class="detail-row">
+                            <small>${label}</small>
+                            <div>${String(value || '—').replace(/\n/g, '<br>')}</div>
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+                  </details>
+                `).join('')}
+                <div class="timeline-note">Досье складывается из найденных фактов и привязывается к полям карточки Bitrix, а не хранится отдельно в сыром виде.</div>
+                ${dossierFields.NAME ? `<div class="timeline-note">Bitrix preview: ${dossierFields.NAME} · ${String(dossierFields.COMMENTS || '').slice(0, 180)}</div>` : ''}
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="card-grid">
+            <div class="card-col">
+              <div class="card-panel">
+                <div class="panel-head">
+                  <strong>Сигналы и материалы</strong>
+                  <span class="status"><span class="dot"></span><span>${profile.topPosts.length} visual cues</span></span>
+                </div>
+                <div class="panel-body">
+                  <div class="signal-grid">
+                    <div class="signal-card">
+                      <small>Кто это</small>
+                      <b>${profile.entityKind}, ${profile.city}</b>
+                    </div>
+                    <div class="signal-card">
+                      <small>Как зайти</small>
+                      <b>${profile.approach}</b>
+                    </div>
+                    <div class="signal-card">
+                      <small>Что не хватает</small>
+                      <b>${profile.missingData.join(', ')}</b>
+                    </div>
+                  </div>
+
+                  <div class="mini-gallery">
+                    ${profile.topPosts.map(([id, title, desc], idx) => `
+                      <div class="mini-shot">
+                        <div class="thumb">
+                          <img alt="${title}" src="${thumb(`${id}-${idx}`)}">
+                        </div>
+                        <div class="mini-copy">
+                          <b>${title}</b>
+                          <span>${desc}</span>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-panel">
+                <div class="panel-head">
+                  <strong>Связанные контакты</strong>
+                  <span class="status"><span class="dot"></span><span>${person.cloud.length} связей</span></span>
+                </div>
+                <div class="panel-body">
+                  <div class="cloud">
+                    ${person.cloud.map(item => `<a class="node" href="#" data-contact="${item.key}">${item.label}</a>`).join('')}
+                  </div>
+                  <div class="timeline-note">${profile.aiNotes}</div>
+                  <div class="timeline-note">Источники: ${profile.sources.length} проверенных ссылок и соцсигналов.</div>
+                </div>
+              </div>
+
+              <div class="card-panel">
+                <div class="panel-head">
+                  <strong>Открытые линии</strong>
+                  <span class="status"><span class="dot"></span><span>link</span></span>
+                </div>
+                <div class="panel-body">
+                  <div class="timeline-note">Ссылка на функционал открытых линий Bitrix, без моковой переписки.</div>
+                  <a class="line-link" href="https://helpdesk.bitrix24.ru/open/25004908/" target="_blank" rel="noreferrer">Открытые линии Bitrix</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-col">
+              <div class="card-panel">
+                <div class="panel-head">
+                  <strong>Скрытые Bitrix поля</strong>
+                  <span class="status"><span class="dot"></span><span>${profile.rawGroups.length} groups</span></span>
+                </div>
+                <div class="panel-body detail-stack">
+                  ${profile.rawGroups.map(group => `
+                    <details class="detail-group">
+                      <summary>
+                        <span>${group.title}</span>
+                        <span>${group.meta}</span>
+                      </summary>
+                      <div class="detail-body">
+                        <div class="detail-list">
+                          ${group.items.map(([label, value]) => `
+                            <div class="detail-row">
+                              <small>${label}</small>
+                              <div>${value}</div>
+                            </div>
+                          `).join('')}
+                        </div>
+                      </div>
+                    </details>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      cardBody.querySelectorAll('[data-contact]').forEach(node => {
+        node.addEventListener('click', (e) => {
+          e.preventDefault();
+          openCard(data[node.dataset.contact]);
+        });
+      });
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    function setSearchQuery(query) {
+      activeQuery = (query || '').toLowerCase();
+      search.value = query || '';
+      renderContacts();
+      saveState();
+    }
+
+    function setContactFilter(type) {
+      if (!contactTypes.includes(type)) return;
+      activeType = type;
+      activeFilter.textContent = activeType;
+      renderFilters();
+      renderContacts();
+      saveState();
+    }
+
+    function openContactById(id) {
+      if (id && data[id]) {
+        openCard(data[id]);
+      }
+    }
+
+    function sendRuntimeReady() {
+      try {
+        window.parent.postMessage({
+          type: 'carte:ready',
+          runtime
+        }, '*');
+      } catch (_) {}
+    }
+
+    function showResultLink(name, contactKey) {
+      const linkHtml = `<a class="msg link" href="#" id="open-card-link">→ ${name}: открыть карточку</a>`;
+      append('bot', linkHtml, true);
+      document.getElementById('open-card-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        openCard(data[contactKey]);
+      });
+    }
+
+    function matchContacts(query) {
+      const normalized = query.toLowerCase();
+      return Object.values(data).filter(person => {
+        const haystack = [person.name, person.role, person.summary, ...(person.tags || []), ...(person.links || []), ...(person.types || [])]
+          .join(' ')
+          .toLowerCase();
+        return haystack.includes(normalized);
+      });
+    }
+
+    function normalizeLookup(text) {
+      return (text || '')
+        .toLowerCase()
+        .replace(/[^a-zа-яё0-9]+/gi, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function scoreKnownContacts(query) {
+      const normalizedQuery = normalizeLookup(query);
+      if (!normalizedQuery) return [];
+      const exact = [];
+      const fuzzy = [];
+
+      Object.values(data).forEach(person => {
+        const name = normalizeLookup(person.name);
+        const alias = normalizeLookup(person.alias || '');
+        const role = normalizeLookup(person.role || '');
+        const summary = normalizeLookup(person.summary || '');
+        const tags = normalizeLookup((person.tags || []).join(' '));
+        const links = normalizeLookup((person.links || []).join(' '));
+        const haystack = [name, alias, role, summary, tags, links].join(' ');
+        if (normalizedQuery === name || normalizedQuery === alias || haystack.includes(normalizedQuery)) {
+          const bucket = (normalizedQuery === name || normalizedQuery === alias) ? exact : fuzzy;
+          bucket.push(person);
+        }
+      });
+
+      return [...exact, ...fuzzy].filter((person, index, array) => array.findIndex(item => item.id === person.id) === index);
+    }
+
+    function looksLikeDirectContactLookup(query, person) {
+      const normalizedQuery = normalizeLookup(query);
+      const name = normalizeLookup(person.name);
+      const alias = normalizeLookup(person.alias || '');
+      if (!normalizedQuery) return false;
+      if (normalizedQuery === name || normalizedQuery === alias) return true;
+      return normalizedQuery.includes(name) && normalizedQuery.length <= name.length + 6;
+    }
+
+    function renderKnownContactChoices(contacts) {
+      const cards = contacts.map(person => `
+        <div class="candidate-card">
+          <div class="candidate-head">
+            <b>${person.name}</b>
+            <span>${person.role}</span>
+          </div>
+          <p>${person.summary}</p>
+          <div class="score-row">
+            ${(person.tags || []).slice(0, 3).map(tag => `<span class="score-pill">${tag}</span>`).join('')}
+          </div>
+          <div class="action-row">
+            <button class="secondary-btn" type="button" data-open-known="${person.id}">Открыть карточку</button>
+          </div>
+        </div>
+      `).join('');
+      return `
+        <div class="result-stack">
+          <div class="timeline-note">Нашёл несколько уже добавленных контактов. Выбери нужного человека, и я открою карточку сразу, без лишнего парсинга.</div>
+          ${cards}
+        </div>
+      `;
+    }
+
+    function summarizeContacts(list) {
+      return list.map(person => `• ${person.name} — ${person.role}`).join('\n');
+    }
+
+    function isAttentionQuery(text) {
+      const lower = (text || '').toLowerCase();
+      return ['срочно', 'urgent', 'срочный', 'срочная', 'кто требует ответа', 'кому написать', 'кто ждет', 'кто ждёт', 'надо ответить', 'требует ответа', 'кому срочно'].some(marker => lower.includes(marker));
+    }
+
+    function buildAttentionDigest() {
+      const list = Object.values(data)
+        .filter(person => person.communication && (person.communication.awaitingReply || person.communication.responsePriority >= 60))
+        .map(person => ({
+          person,
+          score: Number(person.communication?.responsePriority || 0) + (person.communication?.awaitingReply ? 40 : 0) - Number(person.communication?.lastTouchDays || 0)
+        }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 4);
+      if (!list.length) return 'Срочных коммуникаций сейчас не видно.';
+      return list.map(item => `• ${item.person.name} — ${item.person.communication.stageHint}, приоритет ${item.person.communication.responsePriority}/100, действие: ${item.person.communication.nextAction}`).join('\n');
+    }
+
+    function normalizeCandidate(candidate) {
+      const id = candidate.id || String(candidate.name || candidate.alias || Date.now()).toLowerCase().replace(/[^a-zа-яё0-9]+/gi, '-');
+      return {
+        id,
+        name: candidate.name || candidate.alias || 'Без имени',
+        role: candidate.role || 'Музыкальный контакт',
+        types: candidate.types || [String(candidate.role || 'контакт').split('/')[0].trim().toLowerCase()],
+        summary: candidate.summary || candidate.whyFound || 'Кандидат найден по исследовательскому запросу.',
+        photo: photo('#1b2430', '#f2c8a8', '#0f66ff'),
+        tags: ['исследование', `${Math.round((candidate.confidence || 0.5) * 100)}% confidence`],
+        links: candidate.links || candidate.sources || [],
+        stats: [
+          ['Роль', candidate.role || '—'],
+          ['Релевантность', `${candidate.relevance || 60}/100`],
+          ['Значимость', `${candidate.importance || 50}/100`],
+          ['Город', candidate.city || '—']
+        ],
+        cloud: (candidate.connections || []).map((label, index) => ({
+          key: Object.keys(data)[index % Object.keys(data).length],
+          label
+        })),
+        posts: [
+          ['research', 'Исследовательская находка', candidate.whyFound || candidate.summary || 'Требует ручной проверки источников.'],
+          ['source', 'Источники', (candidate.sources || []).join(', ') || 'Источники пока не подтверждены.']
+        ],
+        dossier: candidate.dossier || candidate.bitrixPreview || null,
+        bitrixPreview: candidate.bitrixPreview || null,
+        _candidate: candidate
+      };
+    }
+
+    function rememberCandidates(candidates) {
+      candidates.forEach(candidate => {
+        const person = normalizeCandidate(candidate);
+        data[person.id] = {
+          ...(data[person.id] || {}),
+          ...person,
+          dossier: person.dossier || (data[person.id] && data[person.id].dossier) || null,
+          bitrixPreview: person.bitrixPreview || (data[person.id] && data[person.id].bitrixPreview) || null
+        };
+      });
+      renderContacts();
+    }
+
+    async function addCandidateToBitrix(candidateId) {
+      const person = data[candidateId];
+      if (!person) return;
+      const candidate = person._candidate || {
+        name: person.name,
+        role: person.role,
+        summary: person.summary,
+        links: person.links,
+        sources: person.links,
+        confidence: 0.5
+      };
+      append('system', `Пробую добавить ${person.name} в Bitrix CRM.`);
+      try {
+        const response = await fetch('/api/bitrix/add-contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ candidate })
+        });
+        const result = await response.json();
+        if (!response.ok || result.error) throw new Error(result.error || 'Bitrix вернул ошибку');
+        append('bot', `${person.name} добавлен в Bitrix CRM.`);
+      } catch (error) {
+        append('bot', `Пока не смог добавить в Bitrix: ${error.message}. Контакт сохранен в локальном списке приложения.`);
+      }
+    }
+
+    function renderCandidateResults(candidates) {
+      if (!candidates.length) return '';
+      const cards = candidates.map(candidate => {
+        const person = normalizeCandidate(candidate);
+        return `
+          <div class="candidate-card">
+            <div class="candidate-head">
+              <b>${person.name}</b>
+              <span>${person.role}</span>
+            </div>
+            <p>${candidate.whyFound || person.summary}</p>
+            <div class="score-row">
+              <span class="score-pill">релевантность ${candidate.relevance || 60}</span>
+              <span class="score-pill">значимость ${candidate.importance || 50}</span>
+              <span class="score-pill">${Math.round((candidate.confidence || 0.5) * 100)}% confidence</span>
+            </div>
+            <div class="action-row">
+              <button class="secondary-btn" type="button" data-open-generated="${person.id}">Открыть досье</button>
+              <button class="secondary-btn" type="button" data-add-bitrix="${person.id}">Добавить в Bitrix</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      return `<div class="result-stack">${cards}</div>`;
+    }
+
+    function renderResearchReport(report) {
+      if (!report) return '';
+      const attention = report.attention || null;
+      const pipeline = (report.pipeline || []).map(step => `
+        <div class="report-item">
+          <small>Шаг</small>
+          <div>${step}</div>
+        </div>
+      `).join('');
+      const sources = (report.sourceTargets || []).map(source => `
+        <div class="report-item">
+          <small>${source.title}</small>
+          <div>${source.why}</div>
+        </div>
+      `).join('');
+      const queries = (report.searchQueries || []).slice(0, 6).map(query => `
+        <div class="score-pill">${query}</div>
+      `).join('');
+      const missing = (report.missingUnion || []).length
+        ? report.missingUnion.map(item => `<div class="score-pill">${item}</div>`).join('')
+        : '<div class="score-pill">нет явных дыр</div>';
+      const candidates = (report.candidateReports || []).map(candidate => `
+        <div class="report-item">
+          <small>${candidate.name}</small>
+          <div>${candidate.role} · ${candidate.confidence}% confidence</div>
+          <div>${candidate.summary || '—'}</div>
+          <div>${(candidate.missing || []).length ? `Дырки: ${(candidate.missing || []).join(', ')}` : 'Дырок почти нет'}</div>
+        </div>
+      `).join('');
+      const bitrixFields = report.candidateReports && report.candidateReports[0]
+        ? report.candidateReports[0].bitrixPreview?.coreFields || {}
+        : {};
+      const attentionCards = attention
+        ? attention.top.map(item => `
+            <div class="report-item">
+              <small>${item.name}</small>
+              <div>${item.role} · ${item.score}/100</div>
+              <div>${item.reason}</div>
+              <div>${item.nextAction}</div>
+            </div>
+          `).join('')
+        : '';
+      return `
+        <div class="research-report">
+          ${attention ? `
+            <div class="report-card primary">
+              <div class="report-head">
+                <span>${attention.title}</span>
+                <span>attention</span>
+              </div>
+              <div class="report-value">${attention.summary}</div>
+              <div class="timeline-note">${attention.message}</div>
+              <div class="report-list">${attentionCards}</div>
+            </div>
+          ` : ''}
+          <div class="report-grid">
+            <div class="report-card primary">
+              <div class="report-head">
+                <span>Парсинг-вердикт</span>
+                <span>${report.intent || 'general'}</span>
+              </div>
+              <div class="report-value">${report.summary || 'Система собрала пылесос-пакет: источники, факты, связи и поля для Bitrix.'}</div>
+              <div class="report-list">${pipeline}</div>
+            </div>
+            <div class="report-card">
+              <div class="report-head">
+                <span>Что еще добрать</span>
+                <span>${(report.missingUnion || []).length} gaps</span>
+              </div>
+              <div class="score-row">${missing}</div>
+              <div class="report-head" style="margin-top:4px;">
+                <span>Поисковые запросы</span>
+                <span>${(report.searchQueries || []).length}</span>
+              </div>
+              <div class="score-row">${queries}</div>
+            </div>
+          </div>
+
+          <div class="report-grid">
+            <div class="report-card">
+              <div class="report-head">
+                <span>Источник-план</span>
+                <span>${(report.sourceTargets || []).length}</span>
+              </div>
+              <div class="report-list">${sources}</div>
+            </div>
+            <div class="report-card">
+              <div class="report-head">
+                <span>Готово к Bitrix</span>
+                <span>${bitrixFields.NAME ? 'preview' : 'empty'}</span>
+              </div>
+              <div class="report-item">
+                <small>NAME</small>
+                <div>${bitrixFields.NAME || '—'}</div>
+              </div>
+              <div class="report-item">
+                <small>COMMENTS</small>
+                <div>${(bitrixFields.COMMENTS || '—').replace(/\n/g, '<br>')}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="report-card">
+            <div class="report-head">
+              <span>Кандидаты после парсинга</span>
+              <span>${(report.candidateReports || []).length}</span>
+            </div>
+            <div class="report-list">${candidates}</div>
+            <div class="timeline-note">${(report.nextActions || []).join(' ')}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function bindGeneratedResultActions(container) {
+      container.querySelectorAll('[data-open-known]').forEach(button => {
+        button.addEventListener('click', () => openCard(data[button.dataset.openKnown]));
+      });
+      container.querySelectorAll('[data-open-generated]').forEach(button => {
+        button.addEventListener('click', () => openCard(data[button.dataset.openGenerated]));
+      });
+      container.querySelectorAll('[data-add-bitrix]').forEach(button => {
+        button.addEventListener('click', () => addCandidateToBitrix(button.dataset.addBitrix));
+      });
+    }
+
+    async function routeQueryWithBackend(text) {
+      const knownMatches = scoreKnownContacts(text);
+      if (knownMatches.length === 1 && looksLikeDirectContactLookup(text, knownMatches[0])) {
+        const person = knownMatches[0];
+        append('bot', `Нашёл в базе: ${person.name}. Открываю карточку сразу.`);
+        openCard(person);
+        return;
+      }
+      if (knownMatches.length > 1) {
+        append('bot', 'Нашёл несколько уже добавленных контактов по этому запросу. Выбери нужного человека.');
+        const el = append('bot', renderKnownContactChoices(knownMatches.slice(0, 5)), true);
+        bindGeneratedResultActions(el);
+        return;
+      }
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, placement, placementOptions })
+      });
+      const result = await response.json();
+      if (!response.ok || result.error) throw new Error(result.error || 'Backend вернул ошибку');
+      const candidates = result.candidates || [];
+      const research = result.research || null;
+      const attention = result.attention || null;
+      rememberCandidates(candidates);
+      append('bot', result.answer || 'Готово.');
+      if (attention) {
+        const attentionBody = `
+          <div class="research-report">
+            <div class="report-card primary">
+              <div class="report-head">
+                <span>${attention.title}</span>
+                <span>CRM priority</span>
+              </div>
+              <div class="report-value">${attention.summary}</div>
+              <div class="timeline-note">${attention.message}</div>
+              <div class="report-list">
+                ${(attention.top || []).map(item => `
+                  <div class="report-item">
+                    <small>${item.name}</small>
+                    <div>${item.role} · ${item.score}/100</div>
+                    <div>${item.reason}</div>
+                    <div>Стадия CRM: ${item.stageHint}</div>
+                    <div>Следующий шаг: ${item.nextAction}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+        append('bot', attentionBody, true);
+      }
+      if (research) {
+        const reportEl = append('bot', renderResearchReport(research), true);
+        bindGeneratedResultActions(reportEl);
+      }
+      if (candidates.length) {
+        const el = append('bot', renderCandidateResults(candidates), true);
+        bindGeneratedResultActions(el);
+      }
+    }
+
+    function analyzePerson(person) {
+      const label = person.name;
+      const rels = person.cloud.map(c => c.label).slice(0, 4).join(', ');
+      const signals = person.posts.map(p => p[1]).slice(0, 2).join('; ');
+      return `${label} выглядит как ${person.role.toLowerCase()}. У него сильные пересечения с ${rels}. Последние сигналы: ${signals}.`;
+    }
+
+    function buildPostIdea(person) {
+      return `Идея для поста про ${person.name}: показать не только релиз, но и процесс, связи и людей вокруг него. Формат: короткий сторителлинг + 3 факта + визуальный акцент на коллаборации.`;
+    }
+
+    function buildPostText(person) {
+      return `Новый релиз от ${person.name} уже тут.\n\nЭто история про ${person.role.toLowerCase()} и людей, которые стоят за звуком. ${person.summary}\n\nСохрани, если тебе близок этот вайб.`;
+    }
+
+    function buildReleaseDigest() {
+      const releases = Object.values(data)
+        .flatMap(person => person.posts.map(post => ({ person: person.name, title: post[1], desc: post[2] })))
+        .slice(0, 5);
+      return releases.map(item => `• ${item.person}: ${item.title} — ${item.desc}`).join('\n');
+    }
+
+    window.addEventListener('message', (event) => {
+      const message = event.data || {};
+      if (!message || typeof message !== 'object') return;
+
+      if (message.type === 'carte:set-context') {
+        if (message.runtime && typeof message.runtime === 'object') {
+          if (message.runtime.placement) runtime.placement = message.runtime.placement;
+          if (message.runtime.placementOptions) runtime.placementOptions = message.runtime.placementOptions;
+          if (message.runtime.memberId) runtime.memberId = message.runtime.memberId;
+          if (typeof message.runtime.mobile === 'boolean') runtime.mobile = message.runtime.mobile;
+        }
+        if (typeof message.search === 'string') setSearchQuery(message.search);
+        if (typeof message.typeName === 'string') setContactFilter(message.typeName);
+        if (typeof message.tab === 'string') setTab(message.tab);
+        if (runtime.mobile) document.body.classList.add('mobile-mode');
+      }
+
+      if (message.type === 'carte:open-contact') {
+        openContactById(message.id);
+      }
+
+      if (message.type === 'carte:open-tab' && typeof message.tab === 'string') {
+        setTab(message.tab);
+      }
+
+      if (message.type === 'carte:set-search') {
+        setSearchQuery(message.query || '');
+      }
+
+      if (message.type === 'carte:set-filter') {
+        setContactFilter(message.filter || 'все');
+      }
+    });
+
+    function routeQuery(text) {
+      const lower = text.toLowerCase();
+      const contacts = matchContacts(text);
+
+      if (isAttentionQuery(text)) {
+        append('bot', `Кому писать сейчас:\n${buildAttentionDigest()}`);
+        return;
+      }
+
+      if (lower.includes('покажи') || lower.includes('контакт') || lower.includes('найди') || lower.includes('верифицируй')) {
+        if (contacts.length) {
+          append('bot', `Нашёл ${contacts.length} совпадений:\n${summarizeContacts(contacts.slice(0, 5))}`);
+          showResultLink(contacts[0].name, contacts[0].id);
+          setTab('contacts');
+          activeType = 'все';
+          activeFilter.textContent = activeType;
+          search.value = '';
+          activeQuery = '';
+          renderFilters();
+          renderContacts();
+          return;
+        }
+      }
+
+      if (lower.includes('релиз')) {
+        append('bot', `Собрал последние релизы:\n${buildReleaseDigest()}`);
+        return;
+      }
+
+      if (lower.includes('анализ') || lower.includes('разбери пост') || lower.includes('посты')) {
+        if (contacts.length) {
+          append('bot', `Анализ постов по ${contacts[0].name}:\n${analyzePerson(contacts[0])}`);
+          showResultLink(contacts[0].name, contacts[0].id);
+        } else {
+          append('bot', 'Сначала укажи контакт, по которому нужен анализ постов.');
+        }
+        return;
+      }
+
+      if (lower.includes('идея') || lower.includes('придумай пост')) {
+        const person = contacts[0] || data.fargo;
+        append('bot', buildPostIdea(person));
+        showResultLink(person.name, person.id);
+        return;
+      }
+
+      if (lower.includes('текст') || lower.includes('напиши пост')) {
+        const person = contacts[0] || data.fargo;
+        append('bot', buildPostText(person));
+        showResultLink(person.name, person.id);
+        return;
+      }
+
+      if (lower.includes('связ')) {
+        const person = contacts[0] || data.fargo;
+        append('bot', `Связи по ${person.name}:\n${person.cloud.map(item => `• ${item.label}`).join('\n')}`);
+        showResultLink(person.name, person.id);
+        return;
+      }
+
+      if (contacts.length) {
+        append('bot', `Нашёл контакт: ${contacts[0].name}. Открываю карточку.`);
+        showResultLink(contacts[0].name, contacts[0].id);
+        return;
+      }
+
+      append('bot', 'Принял. Я умею искать контакты, собирать релизы, анализировать посты, генерировать идеи и тексты, а потом вести это к CRM.');
+    }
+
+    tabs.forEach(tab => tab.addEventListener('click', () => setTab(tab.dataset.tab)));
+
+    send.addEventListener('click', async () => {
+      const text = prompt.value.trim();
+      if (!text) return;
+      append('user', text);
+      send.disabled = true;
+      send.textContent = 'Ищу';
+      try {
+        await routeQueryWithBackend(text);
+      } catch (error) {
+        append('system', `Локальный backend недоступен: ${error.message}. Отвечаю демо-логикой из интерфейса.`);
+        routeQuery(text);
+      } finally {
+        send.disabled = false;
+        send.textContent = 'Отправить';
+      }
+      prompt.value = '';
+      prompt.focus();
+    });
+
+    search.addEventListener('input', () => {
+      activeQuery = search.value.trim().toLowerCase();
+      renderContacts();
+      saveState();
+    });
+
+    modalClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    prompt.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        send.click();
+      }
+    });
+
+    loadState();
+    search.value = activeQuery;
+    activeFilter.textContent = activeType;
+    renderFilters();
+    renderContacts();
+    if (placement && placement.startsWith('CRM_')) {
+      setTab('contacts');
+    } else {
+      setTab(activeTab);
+    }
+    sendRuntimeReady();
+  </script>
+</body>
+</html>

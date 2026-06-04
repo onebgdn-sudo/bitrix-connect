@@ -1,0 +1,30 @@
+{
+  "name": "Carte Showbiz",
+  "entry": "/app/bitrix-entry.html",
+  "mobileEntry": "/app/mobile.html",
+  "placements": [
+    {
+      "code": "LEFT_MENU",
+      "title": "Carte Showbiz",
+      "url": "/app/bitrix-entry.html?placement=LEFT_MENU"
+    },
+    {
+      "code": "CRM_CONTACT_DETAIL_TAB",
+      "title": "Carte Showbiz",
+      "url": "/app/bitrix-entry.html?placement=CRM_CONTACT_DETAIL_TAB"
+    },
+    {
+      "code": "CRM_CONTACT_DETAIL_TOOLBAR",
+      "title": "Carte Showbiz",
+      "url": "/app/bitrix-entry.html?placement=CRM_CONTACT_DETAIL_TOOLBAR"
+    }
+  ],
+  "runtimeMessages": [
+    "carte:ready",
+    "carte:set-context",
+    "carte:open-contact",
+    "carte:open-tab",
+    "carte:set-search",
+    "carte:set-filter"
+  ]
+}

@@ -1,0 +1,7 @@
+.env
+reaper_agent/reaper_agent.env
+__pycache__/
+*.pyc
+runtime/
+artifacts/
+resolve_agent/.resolve_reference_index.json

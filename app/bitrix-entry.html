@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carte Showbiz Entry</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: #f3f7fb;
+      font-family: "Aptos", "Segoe UI", sans-serif;
+      color: #1b2430;
+    }
+
+    .wrap {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .card {
+      width: min(420px, 100%);
+      padding: 20px;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid #d6dee7;
+      box-shadow: 0 16px 40px rgba(15, 35, 60, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    p {
+      margin: 0;
+      color: #6a7684;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Подключение Bitrix</h1>
+      <p>Перенаправляю в основной интерфейс с сохранением placement-контекста.</p>
+    </div>
+  </div>
+  <script>
+    const target = new URL('./index.html', location.href);
+    target.search = location.search;
+    target.hash = location.hash;
+    location.replace(target.toString());
+  </script>
+</body>
+</html>

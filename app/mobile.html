@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carte Showbiz Mobile</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, #f4f7fb 0%, #eef3f8 100%);
+      font-family: "Aptos", "Segoe UI", sans-serif;
+      color: #1b2430;
+    }
+
+    .wrap {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      text-align: center;
+      gap: 12px;
+    }
+
+    .card {
+      width: min(420px, 100%);
+      padding: 20px;
+      border-radius: 20px;
+      background: #fff;
+      border: 1px solid #d6dee7;
+      box-shadow: 0 16px 40px rgba(15, 35, 60, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    p {
+      margin: 0 0 16px;
+      color: #6a7684;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 12px;
+      background: #0f66ff;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Carte Showbiz Mobile</h1>
+      <p>Открываю мобильную тестовую версию интерфейса.</p>
+      <a href="./index.html?mobile=1">Открыть</a>
+    </div>
+  </div>
+  <script>
+    location.replace('./index.html?mobile=1');
+  </script>
+</body>
+</html>
