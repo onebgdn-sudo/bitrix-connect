@@ -539,6 +539,77 @@
       gap: 12px;
     }
 
+    .bitrix-context {
+      display: grid;
+      gap: 10px;
+    }
+
+    .bitrix-context-card {
+      border: 1px solid rgba(15, 102, 255, 0.18);
+      border-radius: 14px;
+      background:
+        radial-gradient(circle at top right, rgba(15,102,255,0.08), transparent 24%),
+        linear-gradient(180deg, #fff, #f8fbff);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .bitrix-context-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .bitrix-context-title {
+      display: grid;
+      gap: 3px;
+    }
+
+    .bitrix-context-title b {
+      font-size: 14px;
+      color: var(--ink);
+    }
+
+    .bitrix-context-title span,
+    .bitrix-context-note {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .bitrix-field-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .bitrix-field {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .bitrix-field small {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 800;
+    }
+
+    .bitrix-field div {
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
     .contact-item {
       padding: 14px;
       border: 1px solid var(--line);
@@ -1379,6 +1450,7 @@
           <div class="filters" id="filters"></div>
         </div>
         <div class="contacts-body">
+          <div class="bitrix-context" id="bitrix-context"></div>
           <div class="contacts-list" id="contacts-list"></div>
         </div>
       </div>
@@ -1438,8 +1510,16 @@
     const search = document.getElementById('search');
     const activeFilter = document.getElementById('active-filter');
     const header = document.querySelector('.header');
+    const bitrixContextHost = document.getElementById('bitrix-context');
+    const placementEntityId = placementOptions.ID || placementOptions.id || '';
+    const placementEntityType = placementOptions.ENTITY_TYPE || placementOptions.entityType || '';
     let count = 2;
     const storageKey = isMobileMode ? 'carte-showbiz-mobile' : 'carte-showbiz-desktop';
+    const hasBitrixPlacement = Boolean(placement);
+    const isCrmPlacement = placement.startsWith('CRM_') && Boolean(placementEntityId);
+    let bitrixSummary = null;
+    let bitrixLoadState = hasBitrixPlacement ? 'loading' : 'idle';
+    let bitrixLoadError = '';
 
     const photo = (bg, face = '#f2c8a8', accent = '#1e2a39') => `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
@@ -1712,8 +1792,6 @@
     let activeType = 'все';
     let activeQuery = '';
     let activeTab = 'parse';
-    const placementEntityId = placementOptions.ID || placementOptions.id || '';
-    const placementEntityType = placementOptions.ENTITY_TYPE || placementOptions.entityType || '';
     const runtime = {
       placement,
       placementOptions,
@@ -1751,6 +1829,247 @@
           query: activeQuery
         }));
       } catch (_) {}
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function normalizeBitrixFields(raw) {
+      if (!raw || typeof raw !== 'object') return {};
+      if (raw.result && typeof raw.result === 'object') return raw.result;
+      if (raw.data && typeof raw.data === 'object') return raw.data;
+      return raw;
+    }
+
+    function asList(value) {
+      if (Array.isArray(value)) return value.filter(Boolean);
+      if (value === undefined || value === null || value === '') return [];
+      return [value];
+    }
+
+    function buildBitrixSummaryFromFields(rawFields) {
+      const fields = normalizeBitrixFields(rawFields);
+      const phones = asList(fields.PHONE).map(item => item?.VALUE || item?.value || item).filter(Boolean);
+      const emails = asList(fields.EMAIL).map(item => item?.VALUE || item?.value || item).filter(Boolean);
+      const web = asList(fields.WEB).map(item => item?.VALUE || item?.value || item).filter(Boolean);
+      const fullName = [fields.NAME, fields.SECOND_NAME, fields.LAST_NAME].filter(Boolean).join(' ').trim() || `Контакт #${fields.ID || '?'}`;
+      const role = fields.POST || fields.COMPANY_TITLE || 'Контакт Bitrix';
+      const company = fields.COMPANY_TITLE || '';
+      const source = fields.SOURCE_ID || fields.TYPE_ID || 'crm';
+      const signalParts = [];
+      if (phones.length) signalParts.push(`телефон ${phones.length}`);
+      if (emails.length) signalParts.push(`email ${emails.length}`);
+      if (company) signalParts.push(`компания ${company}`);
+      if (!signalParts.length) signalParts.push('минимум сигнальных полей');
+
+      return {
+        id: `bitrix-${fields.ID || 'contact'}`,
+        name: fullName,
+        role,
+        types: ['crm'],
+        summary: `Контакт из Bitrix CRM подхвачен и разложен в обобщенный вид. ${signalParts.join('. ')}.`,
+        photo: photo('#0f66ff', '#f3c9a5', '#1b2430'),
+        tags: ['Bitrix CRM', company ? 'company-linked' : 'standalone', phones.length ? 'phone' : 'no phone', emails.length ? 'email' : 'no email'],
+        links: [
+          `Bitrix ID: ${fields.ID || '—'}`,
+          company ? `Company: ${company}` : null,
+          phones.length ? 'Phone present' : null,
+          emails.length ? 'Email present' : null,
+          web.length ? 'Web channels present' : null,
+        ].filter(Boolean),
+        stats: [
+          ['Телефоны', String(phones.length)],
+          ['Emails', String(emails.length)],
+          ['Веб', String(web.length)],
+          ['Источник', source],
+        ],
+        cloud: [],
+        posts: [
+          ['1', 'CRM синхронизация', 'Данные контакта разложены в наш обобщенный профиль, без показа сырой карточки.'],
+        ],
+        communication: {
+          awaitingReply: false,
+          lastTouchDays: 0,
+          replyDue: 'today',
+          stageHint: 'crm_synced',
+          responsePriority: phones.length + emails.length > 0 ? 50 : 30,
+          nextAction: 'использовать обобщенный профиль и добрать недостающие сигналы',
+          responseStatus: 'crm_synced',
+          urgencyScore: phones.length + emails.length > 0 ? 50 : 30,
+        },
+      };
+    }
+
+    function renderBitrixContext() {
+      if (!bitrixContextHost) return;
+      if (!hasBitrixPlacement) {
+        bitrixContextHost.innerHTML = '';
+        return;
+      }
+      if (bitrixLoadState === 'loading') {
+        bitrixContextHost.innerHTML = `
+          <div class="bitrix-context-card">
+            <div class="bitrix-context-head">
+              <div class="bitrix-context-title">
+                <b>Bitrix синхронизация</b>
+                <span>Подхватываю текущий контекст карточки...</span>
+              </div>
+              <span class="status"><span class="dot"></span><span>loading</span></span>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      if (bitrixLoadError) {
+        bitrixContextHost.innerHTML = `
+          <div class="bitrix-context-card">
+            <div class="bitrix-context-head">
+              <div class="bitrix-context-title">
+                <b>Bitrix синхронизация</b>
+                <span>Контекст не удалось прочитать</span>
+              </div>
+              <span class="status"><span class="dot"></span><span>fallback</span></span>
+            </div>
+            <div class="bitrix-context-note">${escapeHtml(bitrixLoadError)}</div>
+          </div>
+        `;
+        return;
+      }
+      if (!bitrixSummary) {
+        bitrixContextHost.innerHTML = `
+          <div class="bitrix-context-card">
+            <div class="bitrix-context-head">
+              <div class="bitrix-context-title">
+                <b>Bitrix синхронизация</b>
+                <span>Открой CRM-контакт, чтобы подхватить его в обобщенном виде.</span>
+              </div>
+              <span class="status"><span class="dot"></span><span>waiting</span></span>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      bitrixContextHost.innerHTML = `
+        <div class="bitrix-context-card">
+          <div class="bitrix-context-head">
+            <div class="bitrix-context-title">
+              <b>${escapeHtml(bitrixSummary.name)}</b>
+              <span>${escapeHtml(bitrixSummary.role)} · ${escapeHtml(bitrixSummary.summary)}</span>
+            </div>
+            <span class="status"><span class="dot"></span><span>${escapeHtml(bitrixSummary.communication.stageHint)}</span></span>
+          </div>
+          <div class="bitrix-field-grid">
+            ${bitrixSummary.stats.map(([label, value]) => `
+              <div class="bitrix-field">
+                <small>${escapeHtml(label)}</small>
+                <div>${escapeHtml(value)}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="bitrix-context-note">
+            ${escapeHtml(bitrixSummary.communication.nextAction)}
+          </div>
+        </div>
+      `;
+    }
+
+    function bitrixCall(method, params = {}) {
+      return new Promise((resolve, reject) => {
+        if (!window.BX24 || typeof window.BX24.callMethod !== 'function') {
+          reject(new Error('BX24 недоступен'));
+          return;
+        }
+        try {
+          window.BX24.callMethod(method, params, (result) => {
+            try {
+              if (result && typeof result.error === 'function') {
+                const err = result.error();
+                if (err) {
+                  reject(new Error(err));
+                  return;
+                }
+              }
+              if (result && typeof result.data === 'function') {
+                resolve(result.data());
+                return;
+              }
+              if (result && typeof result.getData === 'function') {
+                resolve(result.getData());
+                return;
+              }
+              resolve(result?.result ?? result?.data ?? result);
+            } catch (error) {
+              reject(error);
+            }
+          });
+        } catch (error) {
+          reject(error);
+        }
+      });
+    }
+
+    async function loadBitrixContext() {
+      if (!hasBitrixPlacement) {
+        renderBitrixContext();
+        return;
+      }
+      bitrixLoadState = 'loading';
+      renderBitrixContext();
+      if (!window.BX24 || typeof window.BX24.init !== 'function') {
+        bitrixLoadState = 'idle';
+        bitrixLoadError = 'BX24 SDK не доступен в этом контексте.';
+        renderBitrixContext();
+        return;
+      }
+      try {
+        await new Promise((resolve) => {
+          window.BX24.init(resolve);
+        });
+        if (isCrmPlacement) {
+          const fields = await bitrixCall('crm.contact.get', { id: placementEntityId });
+          bitrixSummary = buildBitrixSummaryFromFields(fields);
+        } else {
+          bitrixSummary = {
+            id: 'bitrix-context',
+            name: 'Bitrix контекст',
+            role: 'Левое меню / рабочий вход',
+            types: ['crm'],
+            summary: 'Приложение готово принимать команды, задачи и CRM-контекст.',
+            photo: photo('#0f66ff', '#f3c9a5', '#1b2430'),
+            tags: ['Bitrix', 'context'],
+            links: ['Placement ready'],
+            stats: [
+              ['Раздел', placementLabel || 'Bitrix'],
+              ['Формат', 'handler'],
+              ['Статус', 'ready'],
+              ['Режим', isMobileMode ? 'mobile' : 'desktop']
+            ],
+            cloud: [],
+            posts: [['1', 'Контекст Bitrix', 'Приложение открыто внутри портала и готово принимать данные.']],
+            communication: {
+              awaitingReply: false,
+              lastTouchDays: 0,
+              replyDue: 'today',
+              stageHint: 'context_ready',
+              responsePriority: 20,
+              nextAction: 'открыть контакт, задачу или поиск',
+              responseStatus: 'context_ready',
+              urgencyScore: 20,
+            },
+          };
+        }
+        bitrixLoadState = 'ready';
+      } catch (error) {
+        bitrixLoadState = 'idle';
+        bitrixLoadError = error.message || String(error);
+      }
+      renderBitrixContext();
     }
 
     function setTab(name) {
@@ -2068,12 +2387,44 @@
       };
     }
 
+    function buildDossierHighlights(profile) {
+      const communication = profile.communication;
+      const highlights = [
+        {
+          title: 'Главный смысл',
+          value: profile.insightBlocks[0]?.value || profile.summary || '—'
+        },
+        {
+          title: 'Как заходить',
+          value: profile.insightBlocks[1]?.value || profile.approach || '—'
+        },
+        {
+          title: 'Срочность',
+          value: communication
+            ? `${communication.stageHint} · ${communication.urgencyScore}/100 · ${communication.nextAction}`
+            : 'Без срочного ответа'
+        },
+        {
+          title: 'Что добрать',
+          value: (profile.missingData || []).join(', ') || 'Почти всё собрано'
+        }
+      ];
+
+      if (profile.dossier?.summary || profile.dossier?.aiNotes) {
+        highlights.unshift({
+          title: 'Нейросетевой вывод',
+          value: profile.dossier.summary || profile.dossier.aiNotes
+        });
+      }
+
+      return highlights;
+    }
+
     function openCard(person) {
       if (!person) return;
       const profile = buildBitrixProfile(person);
       modalTitle.textContent = person.name;
-      const dossierGroups = profile.dossier?.fieldGroups || [];
-      const dossierFields = profile.dossier?.bitrixFields || {};
+      const dossierHighlights = buildDossierHighlights(profile);
       cardBody.innerHTML = `
         <div class="card-shell">
           <div class="card-hero">
@@ -2148,33 +2499,22 @@
             `).join('')}
           </div>
 
-          ${dossierGroups.length ? `
+          ${dossierHighlights.length ? `
             <div class="card-panel">
               <div class="panel-head">
                 <strong>Нейросетевое досье</strong>
-                <span class="status"><span class="dot"></span><span>Bitrix fields</span></span>
+                <span class="status"><span class="dot"></span><span>summary</span></span>
               </div>
-              <div class="panel-body detail-stack">
-                ${dossierGroups.map(group => `
-                  <details class="detail-group" open>
-                    <summary>
-                      <span>${group.title}</span>
-                      <span>${group.meta}</span>
-                    </summary>
-                    <div class="detail-body">
-                      <div class="detail-list">
-                        ${group.items.map(([label, value]) => `
-                          <div class="detail-row">
-                            <small>${label}</small>
-                            <div>${String(value || '—').replace(/\n/g, '<br>')}</div>
-                          </div>
-                        `).join('')}
-                      </div>
+              <div class="panel-body">
+                <div class="signal-grid">
+                  ${dossierHighlights.map(item => `
+                    <div class="signal-card">
+                      <small>${item.title}</small>
+                      <b>${item.value}</b>
                     </div>
-                  </details>
-                `).join('')}
-                <div class="timeline-note">Досье складывается из найденных фактов и привязывается к полям карточки Bitrix, а не хранится отдельно в сыром виде.</div>
-                ${dossierFields.NAME ? `<div class="timeline-note">Bitrix preview: ${dossierFields.NAME} · ${String(dossierFields.COMMENTS || '').slice(0, 180)}</div>` : ''}
+                  `).join('')}
+                </div>
+                <div class="timeline-note">Это не сырая CRM-форма. Здесь только человеческая выжимка, которая собирается из Bitrix-полей и найденных сигналов.</div>
               </div>
             </div>
           ` : ''}
@@ -2247,31 +2587,33 @@
             <div class="card-col">
               <div class="card-panel">
                 <div class="panel-head">
-                  <strong>Скрытые Bitrix поля</strong>
-                  <span class="status"><span class="dot"></span><span>${profile.rawGroups.length} groups</span></span>
+                  <strong>Bitrix-слой</strong>
+                  <span class="status"><span class="dot"></span><span>${profile.communication ? profile.communication.stageHint : 'context'}</span></span>
                 </div>
-                <div class="panel-body detail-stack">
-                  ${profile.rawGroups.map(group => `
-                    <details class="detail-group">
-                      <summary>
-                        <span>${group.title}</span>
-                        <span>${group.meta}</span>
-                      </summary>
-                      <div class="detail-body">
-                        <div class="detail-list">
-                          ${group.items.map(([label, value]) => `
-                            <div class="detail-row">
-                              <small>${label}</small>
-                              <div>${value}</div>
-                            </div>
-                          `).join('')}
-                        </div>
-                      </div>
-                    </details>
-                  `).join('')}
+                <div class="panel-body">
+                  <div class="signal-grid">
+                    <div class="signal-card">
+                      <small>Статус</small>
+                      <b>${profile.contactStatus}</b>
+                    </div>
+                    <div class="signal-card">
+                      <small>Приоритет</small>
+                      <b>${profile.priorityTier} · ${profile.priorityScore}</b>
+                    </div>
+                    <div class="signal-card">
+                      <small>Следующий шаг</small>
+                      <b>${profile.communication ? profile.communication.nextAction : profile.approach}</b>
+                    </div>
+                    <div class="signal-card">
+                      <small>Что добрать</small>
+                      <b>${profile.missingData.join(', ')}</b>
+                    </div>
+                  </div>
+                  <div class="timeline-note">${profile.dossier?.summary || 'Карточка свёрнута в рабочую выжимку для CRM.'}</div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       `;
@@ -2552,9 +2894,14 @@
           <div>${(candidate.missing || []).length ? `Дырки: ${(candidate.missing || []).join(', ')}` : 'Дырок почти нет'}</div>
         </div>
       `).join('');
-      const bitrixFields = report.candidateReports && report.candidateReports[0]
-        ? report.candidateReports[0].bitrixPreview?.coreFields || {}
+      const bitrixPreview = report.candidateReports && report.candidateReports[0]
+        ? report.candidateReports[0].bitrixPreview || {}
         : {};
+      const bitrixPreviewSummary = bitrixPreview.summary
+        || bitrixPreview.note
+        || bitrixPreview.overview
+        || bitrixPreview.shortSummary
+        || 'Готово к привязке к Bitrix без показа сырых полей.';
       const attentionCards = attention
         ? attention.top.map(item => `
             <div class="report-item">
@@ -2612,16 +2959,9 @@
             <div class="report-card">
               <div class="report-head">
                 <span>Готово к Bitrix</span>
-                <span>${bitrixFields.NAME ? 'preview' : 'empty'}</span>
+                <span>${bitrixPreviewSummary ? 'summary' : 'empty'}</span>
               </div>
-              <div class="report-item">
-                <small>NAME</small>
-                <div>${bitrixFields.NAME || '—'}</div>
-              </div>
-              <div class="report-item">
-                <small>COMMENTS</small>
-                <div>${(bitrixFields.COMMENTS || '—').replace(/\n/g, '<br>')}</div>
-              </div>
+              <div class="report-value">${bitrixPreviewSummary}</div>
             </div>
           </div>
 
@@ -2880,6 +3220,7 @@
     activeFilter.textContent = activeType;
     renderFilters();
     renderContacts();
+    loadBitrixContext();
     if (placement && placement.startsWith('CRM_')) {
       setTab('contacts');
     } else {
